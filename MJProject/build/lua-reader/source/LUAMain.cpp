@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "LuaReader.h"
+#include "LUAReader.h"
 #include "Reader.h"
 #include "AnyLog.h"
 

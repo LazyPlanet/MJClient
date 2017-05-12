@@ -13,7 +13,8 @@ if ( WIN32 AND NOT CYGWIN )
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd" CACHE STRING "")
 endif ()
 
-
+set(CMAKE_CXX_STANDARD 11)
+	
 project(XLua)
 
 option ( UINT_ESPECIALLY "using custom ulong" OFF )
@@ -330,7 +331,7 @@ set_property(
 if(UINT_ESPECIALLY)
     ADD_DEFINITIONS(-DUINT_ESPECIALLY)
 endif()
-	
+
 if ( WIN32 AND NOT CYGWIN )
     if (USING_LUAJIT)
         target_link_libraries(xlua
