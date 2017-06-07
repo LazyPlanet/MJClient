@@ -46,6 +46,7 @@ function Network.AddEventListener()
     FLibEvent.AddEvent(Player.OnGameOperation,"META_TYPE_SHARE_GAME_OPERATION")
     FLibEvent.AddEvent(Player.OnEnterRoom,"META_TYPE_SHARE_ENTER_ROOM")
     FLibEvent.AddEvent(Player.OnPaiOperation,"META_TYPE_SHARE_PAI_OPERATION")
+    FLibEvent.AddEvent(Player.OnSayHi,"META_TYPE_SHARE_SAY_HI")
     
     FLibEvent.AddEvent(Player.OnPaiNotify, "META_TYPE_S2C_PAI_NOTIFY")
     FLibEvent.AddEvent(Player.OnCommonOperation,"META_TYPE_S2C_COMMON_OPERATION_RESPONSE")
@@ -107,6 +108,7 @@ function Network.DelEventListener()
     FLibEvent.DelEvent(Player.OnCreateRoom,"META_TYPE_SHARE_CREATE_ROOM")
     FLibEvent.DelEvent(Player.OnGameOperation,"META_TYPE_SHARE_GAME_OPERATION")
     FLibEvent.DelEvent(Player.OnPaiOperation,"META_TYPE_SHARE_PAI_OPERATION")
+    FLibEvent.DelEvent(Player.OnSayHi,"META_TYPE_SHARE_SAY_HI")
 
     FLibEvent.DelEvent(Player.OnPaiNotify, "META_TYPE_S2C_PAI_NOTIFY")
     FLibEvent.DelEvent(Player.OnCommonOperation,"META_TYPE_S2C_COMMON_OPERATION_RESPONSE")
@@ -126,13 +128,15 @@ end
 --异常断线
 ---------------------------------------------------------------------------
 function Network.OnException() 
+    CS.UnityEngine.Debug.LogWarning("OnException------->>>")
+    ClickEvent.showDisconnect()
 end
 ---------------------------------------------------------------------------
 --连接中断，或者被踢掉
 ---------------------------------------------------------------------------
 function Network.OnDisconnect() 
     CS.UnityEngine.Debug.LogWarning("OnDisconnect------->>>")
-    Player.ThreadFunction(ClickEvent.showDisconnect)
+    ClickEvent.showDisconnect()
 end
 
 function Network.OnReceived(buffer)
@@ -176,9 +180,10 @@ function Network.OnReceiveMessageQueue(protocal,buffer)
         Network.OnConnect()
     elseif protocal == _network_protocal.Exception then
         Network.OnException()
-    elseif protocal == _network_protocal.Disconnect then
         Network.OnClose()
+    elseif protocal == _network_protocal.Disconnect then
         Network.OnDisconnect()
+        Network.OnClose()
     elseif protocal == _network_protocal.Receive then
         Network.OnReceived(buffer)
     end

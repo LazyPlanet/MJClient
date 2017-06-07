@@ -45,8 +45,9 @@ public class TouchCT : MonoBehaviour {
         }
     }
 
-    bool inArea(Vector2 position) {
+    bool inArea(Vector3 position) {
         return (Mathf.Abs(transform.position.x - position.x) < myRenderer.bounds.size.x/2
-                && Mathf.Abs(transform.position.y - position.y) < myRenderer.bounds.size.y/2);
+                && Mathf.Abs(transform.position.y - position.y) < myRenderer.bounds.size.y/ 2
+                && Mathf.Abs(transform.position.z - position.z) < myRenderer.bounds.size.z / 2);
     }
 }

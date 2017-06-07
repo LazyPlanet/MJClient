@@ -17,6 +17,17 @@ ModelImporter:
     100018: Point_D
     100020: Point_N
     100022: Point_XA
+    100024: Plane001
+    100026: Plane002
+    100028: Point_B_2
+    100030: Point_B_3
+    100032: Point_D_2
+    100034: Point_D_3
+    100036: Point_N_2
+    100038: Point_N_3
+    100040: Point_X
+    100042: Point_X_2
+    100044: Point_X_3
     400000: DNXB
     400002: DNXB_bei
     400004: DNXB_dong
@@ -29,6 +40,17 @@ ModelImporter:
     400018: Point_D
     400020: Point_N
     400022: Point_XA
+    400024: Plane001
+    400026: Plane002
+    400028: Point_B_2
+    400030: Point_B_3
+    400032: Point_D_2
+    400034: Point_D_3
+    400036: Point_N_2
+    400038: Point_N_3
+    400040: Point_X
+    400042: Point_X_2
+    400044: Point_X_3
     2300000: DNXB
     2300002: DNXB_bei
     2300004: DNXB_dong
@@ -36,6 +58,8 @@ ModelImporter:
     2300008: DNXB_xi
     2300010: gai
     2300012: zhuo
+    2300014: Plane001
+    2300016: Plane002
     3300000: DNXB
     3300002: DNXB_bei
     3300004: DNXB_dong
@@ -43,6 +67,8 @@ ModelImporter:
     3300008: DNXB_xi
     3300010: gai
     3300012: zhuo
+    3300014: Plane001
+    3300016: Plane002
     4300000: zhuo
     4300002: gai
     4300004: DNXB
@@ -50,6 +76,9 @@ ModelImporter:
     4300008: DNXB_nan
     4300010: DNXB_xi
     4300012: DNXB_bei
+    4300014: Plane001
+    4300016: Plane002
+    7400000: Take 001
     9500000: //RootNode
     11100000: //RootNode
   materials:

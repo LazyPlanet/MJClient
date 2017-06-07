@@ -115,6 +115,8 @@ public class TestCaseGenConfig : XLua.GenConfig
                 typeof(GObjectPool),
                 typeof(Relations),
                 typeof(RelationType),
+                typeof(UIConfig),
+                typeof(GoWrapper),
             };
         }
     }

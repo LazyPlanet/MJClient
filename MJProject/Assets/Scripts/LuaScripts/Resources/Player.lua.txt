@@ -5,6 +5,7 @@ local AssetManager = require "AssetManager"
 --成员变量
 ---------------------------------------------------------------------------
 Player = {}
+local LogWarning = CS.UnityEngine.Debug.LogWarning
 local this = Player
 local _player_data = nil --玩家登录数据
 local _my_player_data = nil --房间内玩家数据
@@ -28,13 +29,17 @@ _da_pai_cache.rear = 0
 local _pai_operation_show_cache = {}
 _pai_operation_show_cache.front = 1
 _pai_operation_show_cache.rear = 0
-local operationState = Enum.CreateEnumTable({"WAIT", "PENG", "GANG", "CHI", "HU", "DAPAI", "XUANFENGGANGFENG", "XUANFENGGANGJIAN", "ANGANG"},-1)
+
+local _ting_pai_cache = {}--听
+
+local operationState = Enum.CreateEnumTable({"WAIT", "PENG", "GANG", "CHI", "HU", "DAPAI", "XUANFENGGANGFENG", "XUANFENGGANGJIAN", "ANGANG", "TINGPAI", "BAOPAI"},-1)
 
 local _invokeFunctionTable = {}
 _invokeFunctionTable.front = 1
 _invokeFunctionTable.rear = 0
 
 local _calculate_data = {}--结算数据
+local _banker_position = 0
 
 function Player.GetinvokeFunctionCache()
     -- body
@@ -103,6 +108,56 @@ function Player.ResetGameState()
     ClickEvent._play_ui.behindPlayerTing.visible = false
     ClickEvent._play_ui.playerTing.visible = false
     ClickEvent._play_ui.gamePlayButton.visible = false
+    --玩家打牌池
+    local dapaiFatherTemp = _pai_pool_show.point_d.father.transform.parent
+    CS.UnityEngine.Object.Destroy(_pai_pool_show.point_d.father)
+    _pai_pool_show.point_d.paiNumber = 0
+    _pai_pool_show.point_d.father = CS.UnityEngine.GameObject("Father")
+    _pai_pool_show.point_d.father.transform:SetParent(dapaiFatherTemp)
+    _pai_pool_show.point_d.cards = {}
+
+    dapaiFatherTemp = _pai_pool_show.point_n.father.transform.parent
+    CS.UnityEngine.Object.Destroy(_pai_pool_show.point_n.father)
+    _pai_pool_show.point_n.paiNumber = 0
+    _pai_pool_show.point_n.father.transform:SetParent(dapaiFatherTemp)
+    _pai_pool_show.point_n.cards = {}
+
+    dapaiFatherTemp = _pai_pool_show.point_x.father.transform.parent
+    CS.UnityEngine.Object.Destroy(_pai_pool_show.point_x.father)
+    _pai_pool_show.point_x.paiNumber = 0
+    _pai_pool_show.point_x.father.transform:SetParent(dapaiFatherTemp)
+    _pai_pool_show.point_x.cards = {}
+
+    dapaiFatherTemp = _pai_pool_show.point_b.father.transform.parent
+    CS.UnityEngine.Object.Destroy(_pai_pool_show.point_b.father)
+    _pai_pool_show.point_b.paiNumber = 0
+    _pai_pool_show.point_b.father.transform:SetParent(dapaiFatherTemp)
+    _pai_pool_show.point_b.cards = {}
+    --碰牌池
+    dapaiFatherTemp = _operation_pai_show.point_d.father.transform.parent
+    CS.UnityEngine.Object.Destroy(_operation_pai_show.point_d.father)
+    _operation_pai_show.point_d.paiNumber = 0
+    _operation_pai_show.point_d.father.transform:SetParent(dapaiFatherTemp)
+    _operation_pai_show.point_d.group = {}
+    
+    dapaiFatherTemp = _operation_pai_show.point_n.father.transform.parent
+    CS.UnityEngine.Object.Destroy(_operation_pai_show.point_n.father)
+    _operation_pai_show.point_n.paiNumber = 0
+    _operation_pai_show.point_n.father.transform:SetParent(dapaiFatherTemp)
+    _operation_pai_show.point_n.group = {}
+    
+    dapaiFatherTemp = _operation_pai_show.point_x.father.transform.parent
+    CS.UnityEngine.Object.Destroy(_operation_pai_show.point_x.father)
+    _operation_pai_show.point_x.paiNumber = 0
+    _operation_pai_show.point_x.father.transform:SetParent(dapaiFatherTemp)
+    _operation_pai_show.point_x.group = {}
+    
+    dapaiFatherTemp = _operation_pai_show.point_b.father.transform.parent
+    CS.UnityEngine.Object.Destroy(_operation_pai_show.point_b.father)
+    _operation_pai_show.point_b.paiNumber = 0
+    _operation_pai_show.point_b.father.transform:SetParent(dapaiFatherTemp)
+    _operation_pai_show.point_b.group = {}
+    
     --玩家手牌
     CS.UnityEngine.Object.Destroy(_player_pai_pool._next_player_father)
     _player_pai_pool._next_player_father = CS.UnityEngine.GameObject("Father")
@@ -110,14 +165,22 @@ function Player.ResetGameState()
     _player_pai_pool._next_pai_number = 0
     _player_pai_pool._next_card = {}
 
-    _player_pai_pool._opposite_player = self.transform:Find("PlayerPaiPool/opposite").gameObject
-    _player_pai_pool._opposite_player_father = self.transform:Find("PlayerPaiPool/opposite/Father").gameObject
+    CS.UnityEngine.Object.Destroy(_player_pai_pool._opposite_player_father)
+    _player_pai_pool._opposite_player_father = CS.UnityEngine.GameObject("Father")
+    _player_pai_pool._opposite_player_father.transform:SetParent(_player_pai_pool._opposite_player.transform)
     _player_pai_pool._opposite_pai_number = 0
     _player_pai_pool._opposite_card = {}
-    _player_pai_pool._forward_player = self.transform:Find("PlayerPaiPool/forward").gameObject
-    _player_pai_pool._forward_player_father = self.transform:Find("PlayerPaiPool/forward/Father").gameObject
+
+    CS.UnityEngine.Object.Destroy(_player_pai_pool._forward_player_father)
+    _player_pai_pool._forward_player_father = CS.UnityEngine.GameObject("Father")
+    _player_pai_pool._forward_player_father.transform:SetParent(_player_pai_pool._forward_player.transform)
     _player_pai_pool._forward_pai_number = 0
     _player_pai_pool._forward_card = {}
+
+    --玩家面前牌
+    CS.UnityEngine.Object.Destroy(_player_father.father)
+    _player_father = {}
+    ClickEvent._play_ui.gamePlayButton.visible = true
 end
 
 
@@ -146,8 +209,8 @@ end
 
 function Player.CmdLogin(name,passWord)
     -- body
-    CS.UnityEngine.Debug.LogWarning(type(name))
-    CS.UnityEngine.Debug.LogWarning(name)
+    LogWarning(type(name))
+    LogWarning(name)
     local login = {
         account = {
             username = name,--""
@@ -205,6 +268,8 @@ end
 
 function Player.CmdPaiOperation(paiOperType,paiChiTable,paiDaTable)
     -- body
+    LogWarning("---------------ClientOperation")
+    LogWarning(paiOperType)
     local paiOperation = {
         oper_type = paiOperType,
         pais = paiChiTable,
@@ -260,6 +325,21 @@ function Player.OnGameInformation(type_t,stuff)
         return
     end
     local message = protobuf.decode("Adoter.Asset.GameInformation",stuff)
+    if not message.banker_player_id then
+        LogWarning("banker_player_id is nil")
+        return
+    end
+    if not Player._all_players_data then
+        LogWarning("_all_players_data is nil")
+        return
+    end
+
+    for k,v in pairs(Player._all_players_data) do
+        if message.banker_player_id == v.common_prop.player_id then
+            ClickEvent.BankerStateUpdate(v.position)
+            break
+        end
+    end
 end
 
 function Player.OnGameCalculate(type_t,stuff)
@@ -303,7 +383,7 @@ function Player.OnRoomInformation(type_t,stuff)
             ClickEvent.RoomInformationUpdate()
         end
     else
-        CS.UnityEngine.Debug.LogWarning("list null")
+        LogWarning("list null")
     end
 end
 
@@ -336,9 +416,9 @@ function Player.OnEnterRoom(type_t,stuff)
         --Player.ThreadFunction(
         Player.LoadScene()
     elseif message.error_code == "ERROR_ROOM_NOT_FOUNT" then
-        CS.UnityEngine.Debug.LogWarning("no found")
+        LogWarning("no found")
     elseif message.error_code == "ERROR_ROOM_IS_FULL" then
-        CS.UnityEngine.Debug.LogWarning("is full")
+        LogWarning("is full")
     end
 end
 
@@ -348,10 +428,10 @@ function Player.OnPlayerList(type_t,stuff)
         return
     end
     local message = protobuf.decode("Adoter.Asset.PlayerList",stuff)
-    CS.UnityEngine.Debug.LogWarning("---------")
+    LogWarning("---------")
     if message.player_list then
         Player._id = message.player_list[1]
-        CS.UnityEngine.Debug.LogWarning(Player._id)
+        LogWarning(Player._id)
     end
     --Player.ThreadFunction(ClickEvent.CreateNewPanel,ClickEvent.panelTable._choose_ui)
     --Player.CmdEnterGame(12)
@@ -365,14 +445,14 @@ function Player.OnPaiOperationAlert(type_t,stuff)
     local message = protobuf.decode("Adoter.Asset.PaiOperationAlert",stuff)
 
     if not message.pais then
-        CS.UnityEngine.Debug.LogWarning("pais data is nil")
+        LogWarning("pais data is nil")
         return
     end
 
     --[[
     if not message.pai then
         if not message.pais then
-            CS.UnityEngine.Debug.LogWarning("pais is nil")
+            LogWarning("pais is nil")
             return
         end
         Player._pais_operation_alert_cache = message.pais
@@ -392,10 +472,10 @@ function Player.OnPaiNotify(type_t,stuff)
     end
     local message = protobuf.decode("Adoter.Asset.PaiNotify",stuff)
     if not message.data_type then
-        CS.UnityEngine.Debug.LogWarning("type is nil")
+        LogWarning("type is nil")
         return
     end
-    CS.UnityEngine.Debug.LogWarning(message.data_type)
+    LogWarning(message.data_type)
     if message.data_type == "CARDS_DATA_TYPE_START" then
         --[[
         Player._invoke_table_test = message
@@ -410,8 +490,8 @@ function Player.OnPaiNotify(type_t,stuff)
             end
         end
         
-        CS.UnityEngine.Debug.LogWarning("countPai----------------")
-        CS.UnityEngine.Debug.LogWarning(countPai)
+        LogWarning("countPai----------------")
+        LogWarning(countPai)
         if countPai == 14 then
             Player.MahJong.SetCurrentState(operationState.DAPAI)
         end
@@ -429,9 +509,9 @@ function Player.OnPaiNotify(type_t,stuff)
     end
     --[[
     for k, v in pairs(message.pais) do
-        CS.UnityEngine.Debug.LogWarning(v.card_type)
+        LogWarning(v.card_type)
         for i, m in pairs(v.cards) do
-            CS.UnityEngine.Debug.LogWarning(m)
+            LogWarning(m)
         end
     end
     ]]
@@ -445,10 +525,10 @@ function Player.OnPaiOperation(type_t,stuff)
     local message = protobuf.decode("Adoter.Asset.PaiOperation",stuff)
 
     if not message.oper_type then
-        CS.UnityEngine.Debug.LogWarning("type is nil")
+        LogWarning("type is nil")
         return
     end
-    CS.UnityEngine.Debug.LogWarning(message.oper_type)
+    LogWarning(message.oper_type)
     --Player._pai_operation_alert_cache = message.pai
 
     if message.oper_type == "PAI_OPER_TYPE_DAPAI" then
@@ -472,7 +552,7 @@ function Player.OnPaiOperation(type_t,stuff)
         --Player.ThreadFunction(
         Player.MahJong.OperationPaiShow(message)
     elseif message.oper_type == "PAI_OPER_TYPE_GIVEUP" then
-        CS.UnityEngine.Debug.LogWarning("give up operation")
+        LogWarning("give up operation")
     elseif message.oper_type == "PAI_OPER_TYPE_XUANFENG_FENG" then
         --Player.SetPaiOperationShowCache(message)
         --Player.ThreadFunction(
@@ -487,6 +567,7 @@ function Player.OnPaiOperation(type_t,stuff)
         Player.MahJong.OperationPaiShow(message)
     elseif message.oper_type == "PAI_OPER_TYPE_TINGPAI" then
         Player.MahJong.TingPai(message)
+        Player.MahJong.DaPaiPoolShow(message)
     else
         return
     end
@@ -536,14 +617,14 @@ function Player.OnGameOperation(type_t,stuff)
     if not message.source_player_id then
         return
     end
-    CS.UnityEngine.Debug.LogWarning(message.source_player_id)
-    CS.UnityEngine.Debug.LogWarning(this._id)
+    LogWarning(message.source_player_id)
+    LogWarning(this._id)
     if message.source_player_id then
         --判断id是谁
         if message.source_player_id == this._id then
             --变化按钮
         else
-            CS.UnityEngine.Debug.LogWarning(message.source_player_id)
+            LogWarning(message.source_player_id)
         end
     end
 end
@@ -556,7 +637,7 @@ function Player.OnCreatePlayer(type_t,stuff)
     local message = protobuf.decode("Adoter.Asset.CreatePlayer", stuff)
 
     this._id = message.player_id
-    CS.UnityEngine.Debug.LogWarning(this._id)
+    LogWarning(this._id)
 end
 
 function Player.OnCreateRoom(type_t,stuff)
@@ -580,12 +661,36 @@ function Player.OnAlterError(type_t,stuff)
     this.error_type = message.error_type
     this.error_show_type = message.error_show_type
     this.error_code = message.error_code
-    CS.UnityEngine.Debug.LogWarning(this.error_type)
+    LogWarning(this.error_type)
     --Player.ThreadFunction(Player.LoadScene)
 end
 
 function Player.OnLoadSuccess()
     this.CmdEnterScene()
+end
+---------------------------------------------------------------------------
+--
+---------------------------------------------------------------------------
+function Player.OnSayHi( type_t,stuff )
+    -- body
+    if not stuff then
+        return
+    end
+    local message = protobuf.decode("Adoter.Asset.SayHi", stuff)
+    if not message.heart_count then
+        LogWarning("heart_count is nil")
+        return
+    end
+    local tempHertCount = message.heart_count + 1
+    Player.CmdSayHi(tempHertCount)
+end
+
+function Player.CmdSayHi( heart_count_client )
+    -- body
+    local sayHi = {
+        heart_count = heart_count_client,
+    }
+    this.SendProtocol("EnterRoom",sayHi)
 end
 
 ---------------------------------------------------------------------------
@@ -597,9 +702,9 @@ function Player.OnAlertMessage(type_t,stuff)
         return
     end
     local message = protobuf.decode("Adoter.Asset.AlertMessage", stuff)
-    CS.UnityEngine.Debug.LogWarning(message.error_type)
-    CS.UnityEngine.Debug.LogWarning(message.error_show_type)
-    CS.UnityEngine.Debug.LogWarning(message.error_code)
+    LogWarning(message.error_type)
+    LogWarning(message.error_show_type)
+    LogWarning(message.error_code)
 end
 ---------------------------------------------------------------------------
 --通用操作返回协议，模拟RPC处理流程
@@ -631,13 +736,13 @@ function Player.ThreadFunction(invokeFunction)
     if Player.self then
         Player.self:Attach(invokeFunction)
     else
-        CS.UnityEngine.Debug.LogWarning("no init Player.self")
+        LogWarning("no init Player.self")
     end
 
     if Player.self then
         Player.SetinvokeFunctionCache(invokeFunction)
     else
-        CS.UnityEngine.Debug.LogWarning("no init Player.self")
+        LogWarning("no init Player.self")
     end
     --]]
     invokeFunction()
