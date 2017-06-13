@@ -1,5 +1,5 @@
 
-ÑV
+òW
 P_Protocol.protoAdoter.AssetP_Asset.proto"-
 Account
 username (
@@ -10,24 +10,23 @@ PaiElement*
 
 card_value (
 
-card_index ("C
+card_index ("e
+ItemElement4
+inventory_type (2.Adoter.Asset.INVENTORY_TYPE
+index (
+	global_id ("C
 User&
 account (2.Adoter.Asset.Account
-player_list ("¿
+player_list ("á
 
-PlayerProp
-online (-
-position (2.Adoter.Asset.POSITION_TYPE
-room_id (0
-	load_type (2.Adoter.Asset.LOAD_SCENE_TYPE5
-game_oper_state (2.Adoter.Asset.GAME_OPER_TYPE
-check_feng_gang (
-check_jian_gang (
-pai_oper_count (
+PlayerProp-
+position (2.Adoter.Asset.POSITION_TYPE
+room_id (0
+	load_type (2.Adoter.Asset.LOAD_SCENE_TYPE5
+game_oper_state (2.Adoter.Asset.GAME_OPER_TYPE
+pai_oper_count (
 
-has_tinged	 (
-oper_count_tingpai
- ("
+has_tinged ("
 
 GameRecord2
 list (2$.Adoter.Asset.GameRecord.GameElement¾
@@ -40,7 +39,7 @@ GameRecord2
 fan_type (2.Adoter.Asset.FAN_TYPE"F
 RoomHistory
 room_id (&
-list (2.Adoter.Asset.GameRecord"²
+list (2.Adoter.Asset.GameRecord"Ë
 
 CommonProp
 	player_id (
@@ -50,13 +49,14 @@ CommonProp
 level (:1:
 gender (2.Adoter.Asset.GENDER_TYPE:GENDER_TYPE_MAN
 diamond (
-	huanledou (
-total_rounds	 (
-total_win_rounds
- (
-streak_wins (
-score (
-room_history ("•
+	huanledou (
+room_card_count	 (
+total_rounds
+ (
+total_win_rounds (
+streak_wins (
+score (
+room_history ("•
 PlayerCommonLimit9
 elements (2'.Adoter.Asset.PlayerCommonLimit.ElementE
 Element
@@ -84,7 +84,7 @@ attachment (2.Adoter.Asset.MailAttachment"I
 	client_ip (
 system (
 
-phone_type ("¥
+phone_type ("ö
 Player-
 common_prop (2.Adoter.Asset.CommonProp
 	server_id (*
@@ -97,8 +97,7 @@ login_time (
 	sign_time (3
 client_info	 (2.Adoter.Asset.ClientInfomation%
 	mail_list
- (2.Adoter.Asset.Mail-
-player_prop (2.Adoter.Asset.PlayerProp"¨
+ (2.Adoter.Asset.Mail"¨
 	Inventory2
 	inventory (2.Adoter.Asset.Inventory.Elementg
 Element4
@@ -124,13 +123,7 @@ login_time (
 room_id (*
 	room_type (2.Adoter.Asset.ROOM_TYPE
 enter_password (*
-options (2.Adoter.Asset.RoomOptions"œ
-RoomOptions,
-model (2.Adoter.Asset.ROOM_MODEL_TYPE3
-extend_type (2.Adoter.Asset.ROOM_EXTEND_TYPE
-top_mutiple (
-
-open_rands (:4"t
+options (2.Adoter.Asset.RoomOptions"t
 
 CreateRoomD
 type_t (2.Adoter.Asset.META_TYPE:META_TYPE_SHARE_CREATE_ROOM 
@@ -152,19 +145,23 @@ ENTER_TYPE
 PlayerLuckyPlateD
 type_t (2.Adoter.Asset.META_TYPE:META_TYPE_SHARE_LUCKY_PLATE
 plate_id (
-result ("Ÿ
+result (" 
 RandomSaiziE
 type_t (2.Adoter.Asset.META_TYPE:META_TYPE_SHARE_RANDOM_SAIZI:
-reason_type (2%.Adoter.Asset.RandomSaizi.REASON_TYPE
-plate_id (
-random_result (%
+reason_type (2%.Adoter.Asset.RandomSaizi.REASON_TYPE
+	player_id (
+random_result (%
 pai (2.Adoter.Asset.PaiElement"=
 REASON_TYPE
 REASON_TYPE_START
 REASON_TYPE_TINGPAI"]
 SayHi?
 type_t (2.Adoter.Asset.META_TYPE:META_TYPE_SHARE_SAY_HI
-heart_count ("û
+heart_count ("c
+
+GuestLoginD
+type_t (2.Adoter.Asset.META_TYPE:META_TYPE_SHARE_GUEST_LOGIN
+account ("û
 	GetRewardA
 type_t (2.Adoter.Asset.META_TYPE:META_TYPE_C2S_GET_REWARD9
 reason (2).Adoter.Asset.GetReward.GET_REWARD_REASON
@@ -202,7 +199,10 @@ ENTER_TYPE
 	LoadSceneA
 type_t (2.Adoter.Asset.META_TYPE:META_TYPE_C2S_LOAD_SCENE0
 	load_type (2.Adoter.Asset.LOAD_SCENE_TYPE
-scene_id ("a
+scene_id ("`
+	ReConnect@
+type_t (2.Adoter.Asset.META_TYPE:META_TYPE_C2S_RECONNECT
+	player_id ("a
 
 PlayerList>
 type_t (2.Adoter.Asset.META_TYPE:META_TYPE_S2C_PLAYERS
@@ -216,16 +216,20 @@ PlayerList>
 error_type (2.Adoter.Asset.ERROR_TYPE6
 error_show_type (2.Adoter.Asset.ERROR_SHOW_TYPE,
 
-error_code (2.Adoter.Asset.ERROR_CODE"³
-CommonOperationResponseP
-type_t (2.Adoter.Asset.META_TYPE:'META_TYPE_S2C_COMMON_OPERATION_RESPONSE.
-client_type_t (2.Adoter.Asset.META_TYPE
-client_message ("ß
+error_code (2.Adoter.Asset.ERROR_CODE"½
+LiuJu<
+type_t (2.Adoter.Asset.META_TYPE:META_TYPE_S2C_LIUJU/
+elements (2.Adoter.Asset.LiuJu.LJElementE
+	LJElement
+	player_id (%
+pai (2.Adoter.Asset.PaiElement"ˆ
 	PaiNotifyA
-type_t (2.Adoter.Asset.META_TYPE:META_TYPE_S2C_PAI_NOTIFY:
-	data_type (2'.Adoter.Asset.PaiNotify.CARDS_DATA_TYPE-
-pais (2.Adoter.Asset.PaiNotify.MutiPai.
-pai (2!.Adoter.Asset.PaiNotify.SinglePaiD
+type_t (2.Adoter.Asset.META_TYPE:META_TYPE_S2C_PAI_NOTIFY
+	player_id (:
+	data_type (2'.Adoter.Asset.PaiNotify.CARDS_DATA_TYPE-
+pais (2.Adoter.Asset.PaiNotify.MutiPai.
+pai (2!.Adoter.Asset.PaiNotify.SinglePai
+cards_remain (D
 MutiPai*
 	card_type (2.Adoter.Asset.CARD_TYPE
 cards (K
@@ -236,15 +240,15 @@ card_value ("a
 CARDS_DATA_TYPE
 CARDS_DATA_TYPE_START
 CARDS_DATA_TYPE_FAPAI
-CARDS_DATA_TYPE_SYNC"°
+CARDS_DATA_TYPE_SYNC"©
 CommonPropertyH
 type_t (2.Adoter.Asset.META_TYPE:META_TYPE_SHARE_COMMON_PROPERTYB
 reason_type (2-.Adoter.Asset.CommonProperty.SYNC_REASON_TYPE
 	player_id (-
-common_prop (2.Adoter.Asset.CommonProp"N
+common_prop (2.Adoter.Asset.CommonProp"G
 SYNC_REASON_TYPE
-SYNC_REASON_TYPE_SELF
-SYNC_REASON_TYPE_ENTER_ROOM"‚
+SYNC_REASON_TYPE_SELF
+SYNC_REASON_TYPE_GET"‚
 PaiOperationAlertJ
 type_t (2.Adoter.Asset.META_TYPE:!META_TYPE_S2C_PAI_OPERATION_ALERT:
 pais (2,.Adoter.Asset.PaiOperationAlert.AlertElemente
@@ -268,11 +272,22 @@ card_value ("a
 record (2.Adoter.Asset.GameRecord"m
 GameInformation@
 type_t (2.Adoter.Asset.META_TYPE:META_TYPE_S2C_GAME_INFO
-banker_player_id (*u
+banker_player_id ("
+KillOut?
+type_t (2.Adoter.Asset.META_TYPE:META_TYPE_S2C_KILL_OUT
+	player_id (1
+
+out_reason (2.Adoter.Asset.KILL_OUT_REASON*u
 ERR_USE_ITEM_TYPE
 ERR_USE_ITEM_TYPE_SUCCESS !
 ERR_USE_ITEM_TYPE_LEVEL_BELOW
-ERR_USE_ITEM_TYPE_LEVEL_UP*‰
+ERR_USE_ITEM_TYPE_LEVEL_UP*J
+ITEM_CHANGED_TYPE
+ITEM_CHANGED_TYPE_GMT
+ITEM_CHANGED_TYPE_MALL*S
+DIAMOND_CHANGED_TYPE
+DIAMOND_CHANGED_TYPE_GMT
+DIAMOND_CHANGED_TYPE_MALL*‰
 POSITION_TYPE
 POSITION_TYPE_NULL 
 POSITION_TYPE_EAST
@@ -289,7 +304,7 @@ ERROR_TYPE
 ERROR_TYPE_NORMAL
 ERROR_TYPE_INVENTORY_FULL*+
 ERROR_SHOW_TYPE
-ERROR_SHOW_TYPE_CHAT*à
+ERROR_SHOW_TYPE_CHAT*ô
 
 ERROR_CODE
 ERROR_SUCCESS 
@@ -303,7 +318,8 @@ ERROR_CODE
 ERROR_ACTIVITY_NOT_OPEN
 ERROR_CLIENT_DATA	
 ERROR_HAS_NO_PLAYER
-
+
+ERROR_DATABASE
 ERROR_ROOM_NOT_FOUNT
 ERROR_ROOM_PASSWORD
 ERROR_ROOM_IS_FULL
@@ -314,7 +330,7 @@ ERROR_CODE
 ERROR_ROOM_TYPE_NOT_FOUND
 ERROR_ROOM_HAS_BEEN_IN
 ERROR_GAME_NO_PERMISSION(
-ERROR_GAME_PAI_UNSATISFIED)*Á	
+ERROR_GAME_PAI_UNSATISFIED)*·	
 	META_TYPE
 META_TYPE_SHARE_BEGIN!
 META_TYPE_SHARE_CREATE_PLAYER
@@ -328,7 +344,8 @@ ERROR_CODE
 META_TYPE_SHARE_LUCKY_PLATE
  
 META_TYPE_SHARE_RANDOM_SAIZI
-META_TYPE_SHARE_SAY_HI
+META_TYPE_SHARE_SAY_HI
+META_TYPE_SHARE_GUEST_LOGIN
 META_TYPE_SHARE_COUNT2
 META_TYPE_C2S_BEGIN3
 META_TYPE_C2S_LOGIN4
@@ -336,36 +353,25 @@ ERROR_CODE
 META_TYPE_C2S_SELECT_SERVER6
 META_TYPE_C2S_ENTER_GAME7
 META_TYPE_C2S_GET_REWARD8
-META_TYPE_C2S_LOAD_SCENE9
+META_TYPE_C2S_LOAD_SCENE9
+META_TYPE_C2S_RECONNECT:
 META_TYPE_C2S_COUNTÿ
 META_TYPE_S2C_BEGINõ
 META_TYPE_S2C_TICKETö
 META_TYPE_S2C_SERVER_LIST÷
 META_TYPE_S2C_PLAYERSø
 META_TYPE_S2C_PLAYER_INFOù
-META_TYPE_S2C_ALERT_ERRORû,
-'META_TYPE_S2C_COMMON_OPERATION_RESPONSEü
+META_TYPE_S2C_ALERT_ERRORû
+META_TYPE_S2C_LIUJUü
 META_TYPE_S2C_PAI_NOTIFYý&
 !META_TYPE_S2C_PAI_OPERATION_ALERTþ
 META_TYPE_S2C_COMMON_LIMITÿ 
 META_TYPE_S2C_COMMON_REWARD€
 META_TYPE_S2C_ROOM_INFO!
 META_TYPE_S2C_GAME_CALCULATE‚
-META_TYPE_S2C_GAME_INFOƒ
-META_TYPE_S2C_COUNTè
-META_TYPE_S2S_BEGINé
-META_TYPE_S2S_REGISTERê
-META_TYPE_S2S_COUNTÜ*N
-ROOM_MODEL_TYPE
-ROOM_MODEL_TYPE_CLASSICAL
-ROOM_MODEL_TYPE_MULTIPLE*È
-ROOM_EXTEND_TYPE
-ROOM_EXTEND_TYPE_ZHANLIHU
-ROOM_EXTEND_TYPE_JIAHU!
-ROOM_EXTEND_TYPE_XUANFENGGANG
-ROOM_EXTEND_TYPE_BAOPAI
-ROOM_EXTEND_TYPE_DUANMEN
-ROOM_EXTEND_TYPE_QIYISE*Š
+META_TYPE_S2C_GAME_INFOƒ
+META_TYPE_S2C_KILL_OUT„
+META_TYPE_S2C_COUNTè*ñ
 PAI_OPER_TYPE
 PAI_OPER_TYPE_BEGIN 
 PAI_OPER_TYPE_DAPAI
@@ -380,10 +386,12 @@ ERROR_CODE
 PAI_OPER_TYPE_TINGPAI
 
 PAI_OPER_TYPE_BAOPAI
-PAI_OPER_TYPE_LIUJU
-PAI_OPER_TYPE_COUNT*y
+PAI_OPER_TYPE_COUNT*y
 GAME_OPER_TYPE
 GAME_OPER_TYPE_NULL
 GAME_OPER_TYPE_START
 GAME_OPER_TYPE_LEAVE
-GAME_OPER_TYPE_KICKOUT
+GAME_OPER_TYPE_KICKOUT*M
+KILL_OUT_REASON
+KILL_OUT_REASON_BEGIN 
+KILL_OUT_REASON_OTHER_LOGIN

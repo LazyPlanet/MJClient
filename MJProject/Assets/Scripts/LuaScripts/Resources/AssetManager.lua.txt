@@ -14,7 +14,30 @@ local _loaded = false
 --加载资源
 ---------------------------------------------------------------------------
 function AssetManager.Load(assetFilePath)
+	local isAndroid = CS.LuaCommon.isAndroid
 	if _loaded then return true end
+	-----------------------------------------------
+	--android load
+	if isAndroid then
+		_loaded = true
+		local folder = CS.System.IO.DirectoryInfo(assetFilePath)
+		for k,v in pairs(folder:GetFileSystemInfos("*")) do
+			--print(v.Name)
+			for j,c in pairs(v:GetFiles("*")) do
+				local co = coroutine.create(function()
+		        local www = CS.UnityEngine.WWW(c.FullName)
+		        yield_return(www)
+		        if not www.error then
+		            --LuaReader.(www.bytes)
+		        else
+		            CS.UnityEngine.Debug.LogWarning('error:'..www.error)
+		        end
+			    end)
+			    coroutine.resume(co)
+			end
+		end
+		return _loaded
+	end
 	-----------------------------------------------
 	_loaded = LuaReader.Load(assetFilePath)
 	return _loaded

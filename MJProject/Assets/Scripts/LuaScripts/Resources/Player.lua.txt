@@ -1,5 +1,6 @@
 local protobuf = require "protobuf"
 local AssetManager = require "AssetManager"
+local LoadingCT = require "LoadingCT"
 
 ---------------------------------------------------------------------------
 --成员变量
@@ -40,6 +41,8 @@ _invokeFunctionTable.rear = 0
 
 local _calculate_data = {}--结算数据
 local _banker_position = 0
+local _calculate_table_loader = {}--计算读表
+local _tosence_name = nil
 
 function Player.GetinvokeFunctionCache()
     -- body
@@ -187,12 +190,15 @@ end
 ---------------------------------------------------------------------------
 --加载场景!!!!!!!type_t，记得添加
 ---------------------------------------------------------------------------
-function Player.LoadScene(type_t, buffer)
+function Player.LoadScene(senceName, buffer)
     for k,v in pairs(ClickEvent._createObject) do
         v:Dispose()
     end
-    Player.CmdLoadScene("LOAD_SCENE_TYPE_START",this._roomId)
-    CS.UnityEngine.Application.LoadLevelAsync("PlaySence")
+    Player._tosence_name = senceName
+    if senceName == "PlaySence" then
+        Player.CmdLoadScene("LOAD_SCENE_TYPE_START",this._roomId)
+    end
+    CS.UnityEngine.Application.LoadLevel("LoadingSence")
 end
 
 ---------------------------------------------------------------------------
@@ -209,8 +215,6 @@ end
 
 function Player.CmdLogin(name,passWord)
     -- body
-    LogWarning(type(name))
-    LogWarning(name)
     local login = {
         account = {
             username = name,--""
@@ -286,6 +290,7 @@ function Player.CmdLoadScene(loadType,sceneId)
         load_type = loadType,
         scene_id = sceneId,
     }
+    LogWarning("jxyDebugLoadSence"..loadType)
     this.SendProtocol("LoadScene",loadScene)
 end
 ---------------------------------------------------------------------------
@@ -396,12 +401,16 @@ function Player.OnPlayerInformation(type_t,stuff)
     if not message.player then
         return
     end
+    --[[
     if not Player._player_data then
         Player._player_data = message.player
         --Player.ThreadFunction(
-        ClickEvent.ThreadToMainMenu()
     else
-        Player._player_data = message.player
+    end
+    --]]
+    Player._player_data = message.player
+    if Player._tosence_name ~= "PlaySence" then
+        ClickEvent.ThreadToMainMenu()
     end
 end
 
@@ -414,7 +423,7 @@ function Player.OnEnterRoom(type_t,stuff)
     if message.error_code == "ERROR_SUCCESS" then
         --CS.LuaBehaviour._room_id = tostring(this._roomId)
         --Player.ThreadFunction(
-        Player.LoadScene()
+        Player.LoadScene("PlaySence")
     elseif message.error_code == "ERROR_ROOM_NOT_FOUNT" then
         LogWarning("no found")
     elseif message.error_code == "ERROR_ROOM_IS_FULL" then
@@ -465,6 +474,37 @@ function Player.OnPaiOperationAlert(type_t,stuff)
     ClickEvent.PaiOperationState()
 end
 
+function Player.OnRandomSaizi(type_t,stuff)
+    -- body
+    if not stuff then
+        return
+    end
+    local message = protobuf.decode("Adoter.Asset.RandomSaizi",stuff)
+    if not message.reason_type then
+        LogWarning("reason_type is nil")
+        return
+    end
+    if message.reason_type == "REASON_TYPE_START" then
+        local count = 0
+        local number1 = 1
+        local number2 = 1
+        for k,v in pairs(message.random_result) do
+            count = count + 1
+            if count == 1 then
+                number1 = v
+            elseif count == 2 then
+                number2 = v
+            end
+        end
+        Player.MahJong.PlayDoubleDices(number1,number2)
+    elseif message.reason_type == "REASON_TYPE_TINGPAI" then
+        for k,v in pairs(message.random_result) do
+            Player.MahJong.PlayerSingleDice(v,message.pai)
+            break
+        end
+    end
+end
+
 function Player.OnPaiNotify(type_t,stuff)
     -- body
     if not stuff then
@@ -481,6 +521,10 @@ function Player.OnPaiNotify(type_t,stuff)
         Player._invoke_table_test = message
         Player.ThreadFunction(Player.MahJong.CreatePlayerPaiTest)
         --]]
+        if Player._my_player_data.common_prop.player_id ~= message.player_id then
+            return
+        end
+
         Player._invoke_table = message
 
         local countPai = 0
@@ -493,15 +537,29 @@ function Player.OnPaiNotify(type_t,stuff)
         LogWarning("countPai----------------")
         LogWarning(countPai)
         if countPai == 14 then
+            ClickEvent.notPushPassMsg = true
             Player.MahJong.SetCurrentState(operationState.DAPAI)
         end
         --Player.ThreadFunction(
-        Player.MahJong.CreatePlayerPai()
+        --Player.MahJong.CreatePlayerPai()
     elseif message.data_type == "CARDS_DATA_TYPE_FAPAI" then
-        Player.MahJong.SetCurrentState(operationState.DAPAI)
-        Player._fa_pai_cache = message.pai
-        --Player.ThreadFunction(
-        Player.MahJong.ZhuaPai()
+        Player.MahJong.ModelPoolDelete(1)
+        if message.pai and Player._my_player_data.common_prop.player_id == message.player_id then
+            Player.MahJong.SetCurrentState(operationState.DAPAI)
+            Player._fa_pai_cache = message.pai
+            ClickEvent.notPushPassMsg = true
+            Player.MahJong.UpdateWhoseTurn(Player._my_player_data.position)
+            Player.MahJong.ZhuaPai()
+        else
+            if Player._all_players_data then
+                for k,v in pairs(Player._all_players_data) do
+                    if v.common_prop.player_id == message.player_id then
+                        Player.MahJong.AddOtherPai(v.position,1)
+                        Player.MahJong.UpdateWhoseTurn(v.position)
+                    end
+                end
+            end
+        end
     elseif message.data_type == "CARDS_DATA_TYPE_SYNC" then
         Player._invoke_table_test = message
         --Player.ThreadFunction(
@@ -534,6 +592,7 @@ function Player.OnPaiOperation(type_t,stuff)
     if message.oper_type == "PAI_OPER_TYPE_DAPAI" then
         --Player.SetDaPaiCache(message)
         --Player.ThreadFunction(
+        Player.MahJong.DeleteOtherPai(message.position,1)
         Player.MahJong.DaPaiPoolShow(message)
     elseif message.oper_type == "PAI_OPER_TYPE_HUPAI" then
         --Player.SetPaiOperationShowCache(message)
@@ -542,14 +601,17 @@ function Player.OnPaiOperation(type_t,stuff)
     elseif message.oper_type == "PAI_OPER_TYPE_GANGPAI" then
         --Player.SetPaiOperationShowCache(message)
         --Player.ThreadFunction(
+        Player.MahJong.UpdateWhoseTurn(message.position)
         Player.MahJong.OperationPaiShow(message)
     elseif message.oper_type == "PAI_OPER_TYPE_PENGPAI" then
         --Player.SetPaiOperationShowCache(message)
         --Player.ThreadFunction(
+        Player.MahJong.UpdateWhoseTurn(message.position)
         Player.MahJong.OperationPaiShow(message)
     elseif message.oper_type == "PAI_OPER_TYPE_CHIPAI" then
         --Player.SetPaiOperationShowCache(message)
         --Player.ThreadFunction(
+        Player.MahJong.UpdateWhoseTurn(message.position)
         Player.MahJong.OperationPaiShow(message)
     elseif message.oper_type == "PAI_OPER_TYPE_GIVEUP" then
         LogWarning("give up operation")
@@ -564,6 +626,7 @@ function Player.OnPaiOperation(type_t,stuff)
     elseif message.oper_type == "PAI_OPER_TYPE_ANGANGPAI" then
         --Player.SetPaiOperationShowCache(message)
         --Player.ThreadFunction(
+        Player.MahJong.UpdateWhoseTurn(message.position)
         Player.MahJong.OperationPaiShow(message)
     elseif message.oper_type == "PAI_OPER_TYPE_TINGPAI" then
         Player.MahJong.TingPai(message)
@@ -648,7 +711,7 @@ function Player.OnCreateRoom(type_t,stuff)
     local message = protobuf.decode("Adoter.Asset.CreateRoom", stuff)
     this._roomId = message.room.room_id
     --Player.ThreadFunction(
-    Player.LoadScene()
+    Player.LoadScene("PlaySence")
     --this._roomType = message.room.room_type
 end
 
@@ -663,6 +726,17 @@ function Player.OnAlterError(type_t,stuff)
     this.error_code = message.error_code
     LogWarning(this.error_type)
     --Player.ThreadFunction(Player.LoadScene)
+end
+--踢玩家
+function Player.OnKillOut(type_t,stuff)
+    -- body
+    if not stuff then
+        return
+    end
+    local message = protobuf.decode("Adoter.Asset.KillOut", stuff)
+    if Player._my_player_data.common_prop.player_id and Player._my_player_data.common_prop.player_id == message.player_id then
+
+    end
 end
 
 function Player.OnLoadSuccess()
@@ -690,7 +764,7 @@ function Player.CmdSayHi( heart_count_client )
     local sayHi = {
         heart_count = heart_count_client,
     }
-    this.SendProtocol("EnterRoom",sayHi)
+    this.SendProtocol("SayHi",sayHi)
 end
 
 ---------------------------------------------------------------------------

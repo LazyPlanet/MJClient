@@ -15,6 +15,7 @@ public class TouchCT : MonoBehaviour {
     private Vector3 downPos;
     private Vector3 movePos;
     private float CameraPosZ = 0.35f;
+    public static TouchCT currentTouchCT;
     // Use this for initialization
     void Start () {
         myRenderer = gameObject.GetComponent<Renderer>();
@@ -22,25 +23,64 @@ public class TouchCT : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (Input.GetMouseButtonDown(0))
+        if(Application.platform == RuntimePlatform.IPhonePlayer || Application.platform == RuntimePlatform.Android)
         {
-            movePos = Input.mousePosition;
-            movePos.z = CameraPosZ;
-            downPos = movePos;
-        }
-        else if (Input.GetMouseButton(0))
-        {
-            movePos = Input.mousePosition;
-            movePos.z = CameraPosZ;
-        }
-        else if (Input.GetMouseButtonUp(0))
-        {
-            movePos = Input.mousePosition;
-            movePos.z = CameraPosZ;
-            if (inArea(Camera.main.ScreenToWorldPoint(movePos)) && downPos == movePos)
+            if (Input.touchCount > 0)
             {
-                if (onClick != null)
-                    onClick(gameObject);
+                Touch touchPoint = Input.touches[0];
+                if (touchPoint.phase == TouchPhase.Canceled || touchPoint.phase == TouchPhase.Ended)
+                {
+                    movePos = touchPoint.position;
+                    movePos.z = CameraPosZ;
+                    if (inArea(Camera.main.ScreenToWorldPoint(movePos)) && downPos == movePos && TouchCT.currentTouchCT != null)
+                    {
+                        if (onClick != null && TouchCT.currentTouchCT == this)
+                            onClick(gameObject);
+                    }
+                }
+                else if (touchPoint.phase == TouchPhase.Began)
+                {
+                    movePos = touchPoint.position;
+                    movePos.z = CameraPosZ;
+                    downPos = movePos;
+                    if (inArea(Camera.main.ScreenToWorldPoint(movePos)))
+                    {
+                        TouchCT.currentTouchCT = this;
+                    }
+                }
+                else if (touchPoint.phase == TouchPhase.Moved)
+                {
+                    movePos = touchPoint.position;
+                    movePos.z = CameraPosZ;
+                }
+            }
+        }
+        else
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                movePos = Input.mousePosition;
+                movePos.z = CameraPosZ;
+                downPos = movePos;
+                if (inArea(Camera.main.ScreenToWorldPoint(movePos)))
+                {
+                    TouchCT.currentTouchCT = this;
+                }
+            }
+            else if (Input.GetMouseButton(0))
+            {
+                movePos = Input.mousePosition;
+                movePos.z = CameraPosZ;
+            }
+            else if (Input.GetMouseButtonUp(0))
+            {
+                movePos = Input.mousePosition;
+                movePos.z = CameraPosZ;
+                if (inArea(Camera.main.ScreenToWorldPoint(movePos)) && downPos == movePos && TouchCT.currentTouchCT != null)
+                {
+                    if (onClick != null && TouchCT.currentTouchCT == this)
+                        onClick(gameObject);
+                }
             }
         }
     }

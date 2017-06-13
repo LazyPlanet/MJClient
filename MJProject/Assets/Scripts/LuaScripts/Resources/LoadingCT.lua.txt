@@ -1,11 +1,56 @@
-local _LoadText
+LoadingCT = {}
+local Enum = require "Enum"
+local FairyGUI = require "FairyGUI"
+local ClickEvent = require "ClickEvent"
+local util = require "xlua.util"
+
+local _main_ui_sence = "FairyMainUI"
+local _loading_sence = "LoadingSence"
+local _play_sence = "PlaySence"
+local _tosence_name = nil
+
+local function AsyncYieldReturn(to_yield, cb)
+    self:YieldAndCallback(to_yield, cb)
+end
+local yield_return = util.async_to_sync(AsyncYieldReturn)
+
+function awake( ... ) 
+	-- body
+	ClickEvent.Awake()
+end
+
 function start()
 	-- body
-	_LoadText = self.transform:Find("LoadText").gameObject:GetComponent("Text")
-
+	--UIConfig.defaultFont = "MJFont"
+	if Player and Player._tosence_name then
+		LoadingCT.ToSence(Player._tosence_name)
+	else
+		LoadingCT.ToSence(_main_ui_sence)
+	end
 end
 
 function update( ... )
 	-- body
-	_LoadText.text = "Loading..."
+	
 end
+
+
+function LoadingCT.WaitForSeconds(seconds)
+	-- body
+	local co = coroutine.create(function()
+    yield_return(CS.UnityEngine.WaitForSeconds(seconds))
+	end)
+	coroutine.resume(co)
+end
+
+function LoadingCT.ToSence(senceName)
+	-- body
+	local co = coroutine.create(function()
+		yield_return(CS.UnityEngine.WaitForSeconds(3))
+	    yield_return(CS.UnityEngine.Application.LoadLevelAsync(senceName))
+	end)
+	coroutine.resume(co)
+end
+
+
+return LoadingCT

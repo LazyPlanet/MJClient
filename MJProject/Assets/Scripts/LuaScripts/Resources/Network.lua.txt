@@ -1,24 +1,44 @@
 local protobuf = require "protobuf"
---local FLibEvent = require "FLibEvent"
---Player = require "Player"
-
---local DataCsv = io.readfile(cc.FileUtils:getInstance():fullPathForFilename("P_Protocol.pb"))
---local _addr = io.open("Assets/Scripts/LuaScripts/Resources/google/protobuf/".."descriptor.pb","rb")
+local util = require "xlua.util"
+local function AsyncYieldReturn(to_yield, cb)
+    Player.self:YieldAndCallback(to_yield, cb)
+end
+local yield_return = util.async_to_sync(AsyncYieldReturn)
 local resultPath = CS.LuaCommon.resultPath
-local _addr = io.open(resultPath.."google/protobuf/".."descriptor.pb","rb")
-local _buffer = _addr:read "*a"
-_addr:close()
-protobuf.register(_buffer)
----[[
-_addr = io.open(resultPath.."P_Asset.pb","rb")
-_buffer = _addr:read "*a"
-_addr:close()
-protobuf.register(_buffer)
----[[
-_addr = io.open(resultPath.."P_Protocol.pb","rb")
-_buffer = _addr:read "*a"
-_addr:close()
-protobuf.register(_buffer)--]]
+local isAndroid = CS.LuaCommon.isAndroid
+
+if isAndroid then
+    CS.UnityEngine.Debug.LogWarning("android")
+    local co = coroutine.create(function()
+        local www = CS.UnityEngine.WWW(resultPath.."P_Asset.pb")
+        yield_return(www)
+        if not www.error then
+            protobuf.register(www.bytes)
+        else
+            CS.UnityEngine.Debug.LogWarning('error:'..www.error)
+        end
+        www = CS.UnityEngine.WWW(resultPath.."P_Protocol.pb")
+        yield_return(www)
+        if not www.error then
+            protobuf.register(www.bytes)
+        else
+            CS.UnityEngine.Debug.LogWarning('error:'..www.error)
+        end
+    end)
+    coroutine.resume(co)
+else
+    CS.UnityEngine.Debug.LogWarning("editor")
+    _addr = io.open(resultPath.."P_Asset.pb","rb")
+    _buffer = _addr:read "*a"
+    _addr:close()
+    protobuf.register(_buffer)
+    ---[[
+    _addr = io.open(resultPath.."P_Protocol.pb","rb")
+    _buffer = _addr:read "*a"
+    _addr:close()
+    protobuf.register(_buffer)--]]
+end
+
 
 Network = {}
 local this = Network
@@ -47,6 +67,7 @@ function Network.AddEventListener()
     FLibEvent.AddEvent(Player.OnEnterRoom,"META_TYPE_SHARE_ENTER_ROOM")
     FLibEvent.AddEvent(Player.OnPaiOperation,"META_TYPE_SHARE_PAI_OPERATION")
     FLibEvent.AddEvent(Player.OnSayHi,"META_TYPE_SHARE_SAY_HI")
+    FLibEvent.AddEvent(Player.OnRandomSaizi,"META_TYPE_SHARE_RANDOM_SAIZI")
     
     FLibEvent.AddEvent(Player.OnPaiNotify, "META_TYPE_S2C_PAI_NOTIFY")
     FLibEvent.AddEvent(Player.OnCommonOperation,"META_TYPE_S2C_COMMON_OPERATION_RESPONSE")
@@ -59,6 +80,7 @@ function Network.AddEventListener()
     FLibEvent.AddEvent(Player.OnSyncCommonReward,"META_TYPE_S2C_COMMON_REWARD")
     FLibEvent.AddEvent(Player.OnGameCalculate,"META_TYPE_S2C_GAME_CALCULATE")
     FLibEvent.AddEvent(Player.OnGameInformation,"META_TYPE_S2C_GAME_INFO")
+    FLibEvent.AddEvent(Player.OnKillOut,"META_TYPE_S2C_KILL_OUT")
 end
 
 ---------------------------------------------------------------------------
@@ -66,7 +88,8 @@ end
 ---------------------------------------------------------------------------
 function Network.ConnetServer()
     --_socketClient:SendConnect()
-    _network_manager:ConnectTo("182.92.87.147",50000)
+    _network_manager:ConnectTo("111.230.140.74",50000)
+    --_network_manager:ConnectTo("182.92.87.147",50000)
     --_network_manager:ConnectTo("192.168.136.100",50000)
     CS.UnityEngine.Debug.LogWarning("Server Connect----->>>")
 end
@@ -107,21 +130,23 @@ function Network.DelEventListener()
     FLibEvent.DelEvent(Player.OnCreatePlayer,"META_TYPE_SHARE_CREATE_PLAYER")
     FLibEvent.DelEvent(Player.OnCreateRoom,"META_TYPE_SHARE_CREATE_ROOM")
     FLibEvent.DelEvent(Player.OnGameOperation,"META_TYPE_SHARE_GAME_OPERATION")
+    FLibEvent.DelEvent(Player.OnEnterRoom,"META_TYPE_SHARE_ENTER_ROOM")
     FLibEvent.DelEvent(Player.OnPaiOperation,"META_TYPE_SHARE_PAI_OPERATION")
     FLibEvent.DelEvent(Player.OnSayHi,"META_TYPE_SHARE_SAY_HI")
+    FLibEvent.DelEvent(Player.OnRandomSaizi,"META_TYPE_SHARE_RANDOM_SAIZI")
 
     FLibEvent.DelEvent(Player.OnPaiNotify, "META_TYPE_S2C_PAI_NOTIFY")
     FLibEvent.DelEvent(Player.OnCommonOperation,"META_TYPE_S2C_COMMON_OPERATION_RESPONSE")
     FLibEvent.DelEvent(Player.OnAlterError,"META_TYPE_S2C_ALTER_ERROR")
     FLibEvent.DelEvent(Player.OnPaiOperationAlert,"META_TYPE_S2C_PAI_OPERATION_ALERT")
     FLibEvent.DelEvent(Player.OnPlayerList,"META_TYPE_S2C_PLAYERS")
-    FLibEvent.DelEvent(Player.OnEnterRoom,"META_TYPE_SHARE_ENTER_ROOM")
     FLibEvent.DelEvent(Player.OnPlayerInformation,"META_TYPE_S2C_PLAYER_INFO")
     FLibEvent.DelEvent(Player.OnRoomInformation,"META_TYPE_S2C_ROOM_INFO")
     FLibEvent.DelEvent(Player.OnAlertMessage,"META_TYPE_S2C_ALERT_ERROR")
     FLibEvent.DelEvent(Player.OnSyncCommonReward,"META_TYPE_S2C_COMMON_REWARD")
     FLibEvent.DelEvent(Player.OnGameCalculate,"META_TYPE_S2C_GAME_CALCULATE")
     FLibEvent.DelEvent(Player.OnGameInformation,"META_TYPE_S2C_GAME_INFO")
+    FLibEvent.DelEvent(Player.OnKillOut,"META_TYPE_S2C_KILL_OUT")
 end
 
 ---------------------------------------------------------------------------

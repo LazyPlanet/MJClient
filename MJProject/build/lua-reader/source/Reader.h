@@ -43,7 +43,8 @@ private:
 	std::unordered_map<std::string /*type_t*/, std::unordered_set<pb::Message*> >  _assets_bytypes;
 	//各个全局ID对应的数据
 	std::unordered_map<int64_t /*global_id*/, pb::Message*>  _assets;
-
+	std::unordered_map<int64_t /*global_id*/, std::string/*二进制数据*/>  _bin_assets;
+	std::unordered_map<int64_t /*global_id*/, std::string/*类型枚举*/>  _assets_name;
 	const pb::DescriptorPool* _pool = nullptr;
 	const pb::FileDescriptor* _file_descriptor = nullptr;
 private:
@@ -66,6 +67,9 @@ public:
 		int32_t message_type = global_id >> 16;
 		return message_type;
 	}
+
+	std::string GetTypeName(int64_t global_id);
+	std::string GetBinContent(int64_t global_id);
 	//加载数据	
 	bool Load(const std::string assetFilePath);
 };

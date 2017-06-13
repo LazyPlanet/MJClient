@@ -69,12 +69,26 @@ static int GetMessageTypeFrom(lua_State* L) {
 	return 1;
 }
 
+static int GetTypeName(lua_State* L) {
+	const int64_t global_id = luaL_checkinteger(L, 1);
+	Asset::LuaReader::Instance().Get(global_id, L);
+	return 1;
+}
+
+static int GetBinContent(lua_State* L) {
+	const int64_t global_id = luaL_checkinteger(L, 1);
+	Asset::LuaReader::Instance().GetBinContent(global_id, L);
+	return 1;
+}
+
 static const struct luaL_Reg LuaReaderFuc[] = {
 	{ "Get", Get },
 	{ "Load", Load },
 	{ "GetMessage", GetMessage },
 	{ "GetMessagesByType", GetMessagesByType },
 	{ "GetMessageTypeFrom", GetMessageTypeFrom },
+	{ "GetTypeName", GetTypeName },
+	{ "GetBinContent", GetBinContent },
 	{ NULL, NULL }										
 };
 

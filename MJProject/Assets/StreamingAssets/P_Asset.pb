@@ -1,23 +1,30 @@
 
-òD
+—J
 P_Asset.protoAdoter.Asset"€
 AssetCommonProp
 	global_id (+
 version (2.Adoter.Asset.VERSION_TYPE
 name (
 	show_name (
-desc ("…
+desc ("»
+RoomOptions,
+model (2.Adoter.Asset.ROOM_MODEL_TYPE
+extend_type_count (:103
+extend_type (2.Adoter.Asset.ROOM_EXTEND_TYPE
+top_mutiple (
+
+open_rands (:4"¥
 	RoomLimit9
 type_t (2.Adoter.Asset.ASSET_TYPE:ASSET_TYPE_ROOM2
 common_prop (2.Adoter.Asset.AssetCommonProp*
 	room_type (2.Adoter.Asset.ROOM_TYPE
 	min_limit (
-	max_limit (
-max_fan (
+	max_limit (
 
-cost_count (
+cost_count (
 
-base_count ("Ñ
+base_count (/
+room_options (2.Adoter.Asset.RoomOptions"Ñ
 CommonLimitA
 type_t (2.Adoter.Asset.ASSET_TYPE:ASSET_TYPE_COMMON_LIMIT2
 common_prop (2.Adoter.Asset.AssetCommonProp?
@@ -57,7 +64,7 @@ limit_type (2+.Adoter.Asset.CommonLimit.COMMON_LIMIT_TYPE@
 
 model_path (
 
-voice_path ("Â
+voice_path ("í
 CommonConstA
 type_t (2.Adoter.Asset.ASSET_TYPE:ASSET_TYPE_COMMON_CONST2
 common_prop (2.Adoter.Asset.AssetCommonProp
@@ -69,7 +76,9 @@ voice_path ("Â
 time_out (:8
 daily_sign_id	 (
 fan_id
- ("Ô
+ (
+room_card_id (
+liuju_count ("Ô
 CommonRewardB
 type_t (2.Adoter.Asset.ASSET_TYPE:ASSET_TYPE_COMMON_REWARD2
 common_prop (2.Adoter.Asset.AssetCommonProp
@@ -135,7 +144,7 @@ GOODS_TYPE
 type_t (2.Adoter.Asset.ASSET_TYPE:ASSET_TYPE_ROOM_FAN2
 common_prop (2.Adoter.Asset.AssetCommonProp
 
-fans_count (:25.
+fans_count (:30.
 fans (2 .Adoter.Asset.RoomFan.FanElementV
 
 FanElement(
@@ -287,14 +296,27 @@ ASSET_TYPE
 ROOM_TYPE_FRIEND
 ROOM_TYPE_XINSHOU
 ROOM_TYPE_GAOSHOU
-ROOM_TYPE_DASHI*t
+ROOM_TYPE_DASHI*ƒ
+ROOM_EXTEND_TYPE
+ROOM_EXTEND_TYPE_NULL 
+ROOM_EXTEND_TYPE_ZHANLIHU
+ROOM_EXTEND_TYPE_JIAHU!
+ROOM_EXTEND_TYPE_XUANFENGGANG
+ROOM_EXTEND_TYPE_BAOPAI
+ROOM_EXTEND_TYPE_DUANMEN
+ROOM_EXTEND_TYPE_QIYISE
+ROOM_EXTEND_TYPE_BAOSANJIA*N
+ROOM_MODEL_TYPE
+ROOM_MODEL_TYPE_CLASSICAL
+ROOM_MODEL_TYPE_MULTIPLE*t
 	CARD_TYPE
 CARD_TYPE_WANZI
 CARD_TYPE_BINGZI
 CARD_TYPE_TIAOZI
 CARD_TYPE_FENG
-CARD_TYPE_JIAN*·
+CARD_TYPE_JIAN*ý
 FAN_TYPE
+FAN_TYPE_PINGHU 
 FAN_TYPE_ZHUANG
 FAN_TYPE_DIAN_PAO
 FAN_TYPE_ZI_MO
@@ -318,4 +340,6 @@ ASSET_TYPE
 FAN_TYPE_XUAN_FENG_GANG
 FAN_TYPE_JIA_HU_NORMAL
 FAN_TYPE_JIA_HU_MIDDLE
-FAN_TYPE_JIA_HU_HIGHER
+FAN_TYPE_JIA_HU_HIGHER
+FAN_TYPE_PIAO_WEIHU
+FAN_TYPE_BAOSANJIA

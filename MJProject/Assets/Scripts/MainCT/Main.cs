@@ -5,7 +5,7 @@ using XLua;
 public class Main : MonoBehaviour {
 
 	private LuaEnv _luaenv;
-
+    
 	public void Start () {
         _luaenv = LuaEnvSingleton.Instance;
         _luaenv.DoString ("require 'Main'");

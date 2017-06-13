@@ -27,17 +27,22 @@ public class LuaCommon
 {
 #if     UNITY_IOS || UNITY_IPHONE
     public static string resultPath = Application.streamingAssetsPath + "/";
-#elif   UNITY_ANDROID
+    public static bool isAndroid = false;
+#elif   UNITY_ANDROID && !UNITY_EDITOR
     public static string resultPath = "jar:file://" + Application.dataPath + "!/assets/";
+    public static bool isAndroid = true;
 #elif   UNITY_EDITOR
     public static string resultPath = Application.streamingAssetsPath + "/";
+    public static bool isAndroid = false;
     //public static string xxxtdrfilepath = Application.dataPath + "/StreamingAssets" + "/testxxx.tdr";
     //public static string xxxtdr2filepath = Application.dataPath + "/StreamingAssets" + "/testxxx2.tdr";
     //public static bool android_platform = false;
 #elif   UNITY_STANDALONE_OSX
     public static string resultPath = Application.streamingAssetsPath + "/";
+    public static bool isAndroid = false;
 #else
     public static string resultPath = Application.streamingAssetsPath + "/";
+    public static bool isAndroid = false;
 #endif
 
     public static bool IsMacPlatform()
@@ -117,6 +122,8 @@ public class TestCaseGenConfig : XLua.GenConfig
                 typeof(RelationType),
                 typeof(UIConfig),
                 typeof(GoWrapper),
+                typeof(WaitForSeconds),
+                typeof(WWW),
             };
         }
     }
