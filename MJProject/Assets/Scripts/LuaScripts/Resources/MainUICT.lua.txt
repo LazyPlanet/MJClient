@@ -1,9 +1,9 @@
 local Enum = require "Enum"
 local Player = require "Player"
 local ClickEvent = require "ClickEvent"
-local Network = require "Network"
 Player.self = self
 ClickEvent.self = self
+local Network = require "Network"
 local FLibEvent = require "FLibEvent"
 local FairyGUI = require "FairyGUI"
 

@@ -1,3 +1,5 @@
+local gbk = require "gbk"
+local Effect = require "Effect"
 ClickEvent = {}
 ClickEvent.panelTable = {}
 ClickEvent.panelTable._main_ui = "Login"
@@ -6,6 +8,10 @@ ClickEvent.panelTable._create_room_ui = "CreateRoom"
 ClickEvent.panelTable._join_room_ui = "GetintoRoom"
 ClickEvent.panelTable._other_message_ui = "OtherMessageUI"
 ClickEvent.panelTable._player_message_ui = "PlayerMessageUI"
+ClickEvent.panelTable._mall_ui = "Mall"
+ClickEvent.panelTable._mail_ui = "Mail"
+ClickEvent.panelTable._setting_ui = "Setting"
+ClickEvent.panelTable._history_score_ui = "HistoryScene"
 ClickEvent.panelTable._store_ui = "StoreUI"
 ClickEvent.panelTable._play_game_ui = "PlaySence"
 ClickEvent.panelTable._player_info = "PlayerInfo"
@@ -14,6 +20,7 @@ ClickEvent.panelTable._calculate_ui = "ClearRoundScene"
 ClickEvent.panelTable._window_small = "PopWindowsSmall"
 ClickEvent.uiPanel = nil
 ClickEvent.isInDouRoom = false
+ClickEvent.scale = nil
 
 ClickEvent._createObject = {}
 ClickEvent._play_ui = {}
@@ -27,6 +34,8 @@ local _position_index = {
 
 local operationState = Enum.CreateEnumTable({"WAIT", "PENG", "GANG", "CHI", "HU", "DAPAI", "XUANFENGGANGFENG", "XUANFENGGANGJIAN", "ANGANG", "TINGPAI", "BAOPAI"},-1)
 
+local notPushPassMsg = false
+
 local _currentPanel = {}
 local _popPanel = {}
 local Camera = CS.UnityEngine.Camera
@@ -37,12 +46,13 @@ function ClickEvent.Awake( ... )
 	UIConfig.defaultFont = "MJFont"
 	UIPackage.AddPackage("FairyUI/MXUI")
 	ClickEvent.uiPanel = CS.UnityEngine.GameObject.Find("UIPanel"):GetComponent("UIPanel")
+	ClickEvent.scale = ClickEvent.uiPanel.transform.localScale.x
+	ClickEvent._createObject = {}
+	CS.UnityEngine.Application.targetFrameRate = 60
 end
 function ClickEvent.Start(loadUI)
 	-- body
-	ClickEvent._createObject = {}
-	CS.UnityEngine.Application.targetFrameRate = 60
-	--ClickEvent.uiPanel.ui:RemoveChildren()
+	ClickEvent.uiPanel.ui.visible = false
 	ClickEvent.CreateNewPanel(loadUI)
 end
 
@@ -60,6 +70,7 @@ function ClickEvent.CreateNewPanel(panelName)
 		ClickEvent._createObject[panelName] = UIPackage.CreateObject("MXUI", panelName)
 	end
 	_currentPanel.panel = ClickEvent._createObject[panelName]
+	_currentPanel.panel.name = panelName
 	_currentPanel.panel:SetSize(GRoot.inst.width, GRoot.inst.height)
 	_currentPanel.panel:SetPosition(0,0,0)
 	GRoot.inst:AddChild(_currentPanel.panel)
@@ -70,10 +81,12 @@ function ClickEvent.CreateNewPanel(panelName)
 			obj.onClick:Add(ClickEvent.registerButtonClick)
 		end
 	end
+	--[[
 	if Player._player_data and Player._player_data.common_prop and _currentPanel.panel:GetChild("Name") and _currentPanel.panel:GetChild("Name"):GetChild("PlayerName") then
 		CS.UnityEngine.Debug.LogWarning(Player._player_data.common_prop.name)
 		_currentPanel.panel:GetChild("Name"):GetChild("PlayerName").text = Player._player_data.common_prop.name
 	end
+	--]]
 	if not ClickEvent._play_ui then
 		ClickEvent._play_ui = {}
 	end
@@ -103,25 +116,48 @@ function ClickEvent.CreateNewPanel(panelName)
 		ClickEvent._play_ui.behindPaiShow.visible = false
 		ClickEvent._play_ui.oppositePaiShow = _currentPanel.panel:GetChild("OppositePaiShow")
 		ClickEvent._play_ui.oppositePaiShow.visible = false
-		ClickEvent._play_ui.selfBanker = _currentPanel.panel:GetChild("PlayerAvatarInfo"):GetChild("Zhuang")
-		ClickEvent._play_ui.nextBanker = _currentPanel.panel:GetChild("BehindPlayerAvatarInfo"):GetChild("Zhuang")
-		ClickEvent._play_ui.oppositeBanker = _currentPanel.panel:GetChild("OppositePlayerAvatarInfo"):GetChild("Zhuang")
-		ClickEvent._play_ui.forwardBanker = _currentPanel.panel:GetChild("FrontPlayerAvatarInfo"):GetChild("Zhuang")
+		ClickEvent._play_ui.playerAvatarInfo = _currentPanel.panel:GetChild("PlayerAvatarInfo")
+		ClickEvent._play_ui.behindPlayerAvatarInfo = _currentPanel.panel:GetChild("BehindPlayerAvatarInfo")
+		ClickEvent._play_ui.oppositePlayerAvatarInfo = _currentPanel.panel:GetChild("OppositePlayerAvatarInfo")
+		ClickEvent._play_ui.frontPlayerAvatarInfo = _currentPanel.panel:GetChild("FrontPlayerAvatarInfo")
+		ClickEvent._play_ui.selfBanker = ClickEvent._play_ui.playerAvatarInfo:GetChild("Zhuang")
+		ClickEvent._play_ui.nextBanker = ClickEvent._play_ui.behindPlayerAvatarInfo:GetChild("Zhuang")
+		ClickEvent._play_ui.oppositeBanker = ClickEvent._play_ui.oppositePlayerAvatarInfo:GetChild("Zhuang")
+		ClickEvent._play_ui.forwardBanker = ClickEvent._play_ui.frontPlayerAvatarInfo:GetChild("Zhuang")
 		ClickEvent._play_ui.selfBanker.visible = false
 		ClickEvent._play_ui.nextBanker.visible = false
 		ClickEvent._play_ui.oppositeBanker.visible = false
 		ClickEvent._play_ui.forwardBanker.visible = false
 
-		ClickEvent._play_ui.playerAvatarInfo = _currentPanel.panel:GetChild("PlayerAvatarInfo")
+		Effect.AddUIEffect("Effect_UI_Head portrait_01_Position",CS.UnityEngine.Vector3(110,110,110),ClickEvent._play_ui.playerAvatarInfo)
 		--[[
-		local effectPrefab = CS.UnityEngine.Resources.Load("Effect/Effect_UI_Head portrait_01")
-		local effectPlayer = CS.UnityEngine.Object.Instantiate(effectPrefab)
-		effectPlayer.transform.position = ClickEvent._play_ui.playerAvatarInfo.displayObject.gameObject.transform.position
 		effectPlayer.transform.position = Camera.main:ScreenToWorldPoint(ClickEvent._play_ui.playerAvatarInfo:TransformPoint(ClickEvent._play_ui.playerAvatarInfo.xy,nil).x,
 			ClickEvent._play_ui.playerAvatarInfo:TransformPoint(ClickEvent._play_ui.playerAvatarInfo.xy,nil).y,0.35)
-		local x = GGraph()
 		ClickEvent._play_ui.playerAvatarInfo:AddChild(x)
-		x:SetNativeObject(GoWrapper(effectPlayer))
+		--]]
+	elseif panelName == ClickEvent.panelTable._choose_ui and Player._player_data then
+		_currentPanel.panel:GetChild("Name"):GetChild("PlayerName").text = Player._player_data.common_prop.name
+		_currentPanel.panel:GetChild("DouNum"):GetChild("DouNum").text = tostring(Player._player_data.common_prop.huanledou)
+		_currentPanel.panel:GetChild("GemsNum"):GetChild("GemsNum").text = tostring(Player._player_data.common_prop.diamond)
+		_currentPanel.panel:GetChild("RoomCardNum"):GetChild("RoomCardNum").text = tostring(Player._player_data.common_prop.room_card_count)
+
+		ClickEvent._play_ui.avatarLoader = _currentPanel.panel:GetChild("Avatar"):GetChild("AvatarLoader")
+		_currentPanel.panel:GetChild("Inform"):GetChild("InformText"):GetChild("txtFixed").text = "[Color=#70DB93,#B5A642]游戏严打外挂，一旦发现立即封号[/Color]"
+		ClickEvent._play_ui.avatarLoader.url = UIPackage.GetItemURL("MXUI","Touxiang02")
+		--[[
+		local image = _currentPanel.panel:GetChild("Back"):GetChild("n1")
+		LogWarning(image.displayObject.gameObject:GetComponent("Renderer").bounds.size.x)
+		LogWarning(image.displayObject.size.x * ClickEvent.scale)
+		for k,v in pairs(Player._player_data.inventory.inventory) do
+			for j,c in pairs(v.items) do
+				print("ITEM_TYPE_ROOM_CARD")
+				print(c.type_t)
+				if c.type_t == "ITEM_TYPE_ROOM_CARD" then
+					local tempMsg = protobuf.decode(AssetManager.GetMessagesByType(c.type_t),c.stuff)
+					_currentPanel.panel:GetChild("RoomCardNum"):GetChild("RoomCardNum").text = tostring(tempMsg.item_common_prop.count)
+				end
+			end
+		end
 		--]]
 	end
 	ClickEvent._play_ui.roomId = _currentPanel.panel:GetChild("RoomID")
@@ -142,6 +178,7 @@ function ClickEvent.CreateOperationButton( ... )
 	_currentPanel.buttonList["GameHuButton"] = UIPackage.GetItemURL("MXUI","GameHuButton")
 	_currentPanel.buttonList["GameTingButton"] = UIPackage.GetItemURL("MXUI","GameTingButton")
 	_currentPanel.buttonList["XuanFengButton"] = UIPackage.GetItemURL("MXUI","XuanFengButton")
+	_currentPanel.buttonList["ClearShowFan"] = UIPackage.GetItemURL("MXUI","ClearShowFan")
 end
 
 function ClickEvent.AddOperationButton( buttonName )
@@ -190,6 +227,7 @@ end
 
 function ClickEvent.BankerStateUpdate(bankerPos)
 	-- body
+	Player.MahJong.UpdateWhoseTurn(bankerPos)
 	Player._banker_position = ClickEvent.PlayerPosition(bankerPos)
 	if Player._banker_position == 0 then
 		ClickEvent._play_ui.selfBanker.visible = true
@@ -246,7 +284,7 @@ function ClickEvent.PaiOperationState()
 			end
 		end
 	end
-		
+	
     for k,v in pairs(Player._operation_alert_cache.pais) do
     	for j,m in pairs(v.oper_list) do
 	    	CS.UnityEngine.Debug.LogWarning(m)
@@ -315,8 +353,10 @@ end
 
 function ClickEvent.PopPanel( panelName )
 	-- body
+	local addEffect = false
 	if not ClickEvent._createObject["Bg"] then
 		ClickEvent._createObject["Bg"] = UIPackage.CreateObject("MXUI", "Bg").asCom
+		addEffect = true
 	end
 	if not ClickEvent._createObject[panelName] then
 		ClickEvent._createObject[panelName] = UIPackage.CreateObject("MXUI", panelName).asCom
@@ -326,13 +366,18 @@ function ClickEvent.PopPanel( panelName )
 	_popPanel.background:SetSize(GRoot.inst.width, GRoot.inst.height)
 	_popPanel.background:Center()
 	_popPanel.background:SetPosition(0,0,0)
+	_popPanel.background.onTouchBegin:Add(ClickEvent.registerButtonDown)
+	_popPanel.background.onTouchEnd:Add(ClickEvent.registerButtonUp)
 
 	_popPanel.panel = ClickEvent._createObject[panelName]
+	_popPanel.panel.name = panelName
 	_popPanel.panel:SetSize(GRoot.inst.width, GRoot.inst.height)
 	_popPanel.panel:Center()
 	_popPanel.panel:SetPosition(0,0,0)
 	GRoot.inst:AddChild(_popPanel.background)
 	GRoot.inst:AddChild(_popPanel.panel)
+	--GRoot.inst:RemoveChild(_popPanel.panel)
+	--GRoot.inst:AddChild(_popPanel.panel)
 	local childNumber = _popPanel.panel.numChildren
 	for i=0,childNumber-1 do
 		local obj = _popPanel.panel:GetChildAt(i)
@@ -341,6 +386,13 @@ function ClickEvent.PopPanel( panelName )
 		end
 	end
 	--[[
+	local image = _popPanel.background:GetChild("Di")
+	LogWarning(image.displayObject.gameObject:GetComponent("Renderer").bounds.size.x)
+	LogWarning(_currentPanel.panel:GetChild("Bg").displayObject.gameObject:GetComponent("Renderer").bounds.size.x)
+	LogWarning(image.displayObject.size.x * ClickEvent.scale)
+	if panelName == ClickEvent.panelTable._create_room_ui and addEffect then
+		Effect.AddUIEffect("Effect_UI_button_02",CS.UnityEngine.Vector3(100,100,100),_popPanel.panel:GetChild("CreateButton"),image.displayObject.gameObject)
+	end
 	local tempObj = CS.UnityEngine.Resources.Load("UIPrefab/"..panelName)
 	_popPanel.panel = CS.UnityEngine.Object.Instantiate(tempObj,ClickEvent.self.transform)
 	_popPanel.panel.transform.localScale = CS.UnityEngine.Vector3.one
@@ -378,18 +430,75 @@ function ClickEvent.ShowCalculate( ... )
 		end
 		local tempX = _position_index[currentPositionData.position] - _position_index[myPosition]
 		if tempX == 1 then
-			_popPanel.panel:GetChild("BehindPlayerClearInfo"):GetChild("PlayerName").text = currentPositionData.common_prop.player_id
+			_popPanel.panel:GetChild("BehindPlayerClearInfo"):GetChild("PlayerName").text = v.player_id
 			_popPanel.panel:GetChild("BehindPlayerClearInfo"):GetChild("DouNum").text = v.score
 		elseif tempX == 2 then
-			_popPanel.panel:GetChild("OppositePlayerClearInfo"):GetChild("PlayerName").text = currentPositionData.common_prop.player_id
+			_popPanel.panel:GetChild("OppositePlayerClearInfo"):GetChild("PlayerName").text = v.player_id
 			_popPanel.panel:GetChild("OppositePlayerClearInfo"):GetChild("DouNum").text = v.score
 		elseif tempX == 3 then
-			_popPanel.panel:GetChild("FrontPlayerClearInfo"):GetChild("PlayerName").text = currentPositionData.common_prop.player_id
+			_popPanel.panel:GetChild("FrontPlayerClearInfo"):GetChild("PlayerName").text = v.player_id
 			_popPanel.panel:GetChild("FrontPlayerClearInfo"):GetChild("DouNum").text = v.score
 		else
-			_popPanel.panel:GetChild("MyClearInfo"):GetChild("PlayerName").text = currentPositionData.common_prop.player_id
+			_popPanel.panel:GetChild("MyClearInfo"):GetChild("PlayerName").text = v.player_id
 			_popPanel.panel:GetChild("MyClearInfo"):GetChild("DouNum").text = v.score
+			local detailList = _popPanel.panel:GetChild("MyClearInfo"):GetChild("FanList")
+			detailList:RemoveChildrenToPool()
+			for i,c in pairs(v.details) do
+				local fanName = nil
+				local fanNum = nil
+				for a,b in pairs(Player._calculate_table_loader) do
+					for a1,b1 in pairs(b.fans) do
+						if c.fan_type == b1.fan_type then
+							fanName = b1.name
+							fanNum = b1.multiple
+							break
+						end
+					end
+				end
+				local listChild = detailList:AddItemFromPool(_currentPanel.buttonList["ClearShowFan"])
+				listChild.name = ""..i
+				listChild:GetChild("FanName").text = gbk.toutf8(fanName)
+				listChild:GetChild("FanNum").text = "+"..tostring(fanNum).."番"
+				if c.score < 0 then
+					listChild:GetChild("FanDou").text = ""..c.score
+				else
+					listChild:GetChild("FanDou").text = "+"..c.score
+				end
+				--listChild:GetChild("FanPlayer").text = "+"..c.score
+			end
 		end
+	end
+end
+
+function ClickEvent.DapaiUIShow(position,card_type,card_value)
+	-- body
+	local whichPlayer = ClickEvent.PlayerPosition(position)
+	if whichPlayer == 1 then
+		ClickEvent._play_ui.behindPaiShow:GetChild("PaiLoader").url = UIPackage.GetItemURL("MXUI",card_type.."_"..card_value)
+		ClickEvent._play_ui.behindPaiShow.visible = true
+	elseif whichPlayer == 2 then
+		ClickEvent._play_ui.oppositePaiShow:GetChild("PaiLoader").url = UIPackage.GetItemURL("MXUI",card_type.."_"..card_value)
+		ClickEvent._play_ui.oppositePaiShow.visible = true
+	elseif whichPlayer == 3 then
+		ClickEvent._play_ui.frontPaiShow:GetChild("PaiLoader").url = UIPackage.GetItemURL("MXUI",card_type.."_"..card_value)
+		ClickEvent._play_ui.frontPaiShow.visible = true
+	else
+		CS.UnityEngine.Debug.LogWarning("position nil")
+	end
+	Player.MahJong.DapaiUIHide(whichPlayer)
+end
+
+function ClickEvent.DapaiUIHide(position)
+	-- body
+	
+	if position == 1 then
+		ClickEvent._play_ui.behindPaiShow.visible = false
+	elseif position == 2 then
+		ClickEvent._play_ui.oppositePaiShow.visible = false
+	elseif position == 3 then
+		ClickEvent._play_ui.frontPaiShow.visible = false
+	else
+		CS.UnityEngine.Debug.LogWarning("position nil")
 	end
 end
 
@@ -400,7 +509,85 @@ function ClickEvent.showDisconnect( ... )
 end
 ---------------------------------------------------------------------------
 -------------点击功能函数
----------------------------------------------------------------------------
+---------------------------------------------------------------------------、
+
+function ClickEvent.GameSettingButton( ... )
+	-- body
+	ClickEvent.PopPanel(ClickEvent.panelTable._setting_ui)
+end
+
+function ClickEvent.Shop( ... )
+	-- body
+	ClickEvent.PopPanel(ClickEvent.panelTable._mall_ui)
+	_popPanel.panel:GetChild("MallDouButton").selected = true
+end
+
+function ClickEvent.Instruction( ... )
+	-- body
+end
+
+function ClickEvent.Mail( ... )
+	-- body
+	print("mail")
+	ClickEvent.PopPanel(ClickEvent.panelTable._mail_ui)
+end
+
+function ClickEvent.VIPRecordButton( ... )
+	-- body
+	ClickEvent.PopPanel(ClickEvent.panelTable._history_score_ui)
+end
+
+function ClickEvent.Promotion( ... )
+	-- body
+end
+
+function ClickEvent.Welfare( ... )
+	-- body
+end
+
+function ClickEvent.Setting( ... )
+	-- body
+	ClickEvent.PopPanel(ClickEvent.panelTable._setting_ui)
+end
+
+function ClickEvent.More( ... )
+	-- body
+end
+
+function ClickEvent.RoomCardNum( ... )
+	-- body
+	ClickEvent.PopPanel(ClickEvent.panelTable._mall_ui)
+	_popPanel.panel:GetChild("MallItemButton").selected = true
+end
+
+function ClickEvent.DouNum( ... )
+	-- body
+	ClickEvent.PopPanel(ClickEvent.panelTable._mall_ui)
+	_popPanel.panel:GetChild("MallDouButton").selected = true
+end
+
+function ClickEvent.GemsNum( ... )
+	-- body
+	ClickEvent.PopPanel(ClickEvent.panelTable._mall_ui)
+	_popPanel.panel:GetChild("MallGemsButton").selected = true
+end
+
+function ClickEvent.Avatar( ... )
+	-- body
+	ClickEvent.PopPanel(ClickEvent.panelTable._player_info)
+	_popPanel.panel:GetChild("PlayerInformation"):GetChild("PlayerName").text = Player._player_data.common_prop.name
+	_popPanel.panel:GetChild("PlayerInformation"):GetChild("PlayerID").text = Player._player_data.common_prop.player_id
+	_popPanel.panel:GetChild("DouNum").text = Player._player_data.common_prop.huanledou
+	_popPanel.panel:GetChild("GemsNum").text = Player._player_data.common_prop.diamond
+	_popPanel.panel:GetChild("RoomCardNum").text = Player._player_data.common_prop.room_card_count
+	_popPanel.panel:GetChild("TotalWin").text = Player._player_data.common_prop.streak_wins
+	_popPanel.panel:GetChild("TotalPlay").text = Player._player_data.common_prop.total_rounds
+	if Player._player_data.common_prop.total_rounds == 0 then
+		_popPanel.panel:GetChild("WinRate").text = 0
+	else
+		_popPanel.panel:GetChild("WinRate").text = math.modf(Player._player_data.common_prop.total_win_rounds*100/Player._player_data.common_prop.total_rounds).."%"
+	end
+end
 
 function ClickEvent.NextRoundButton( ... )
 	-- body
@@ -617,38 +804,6 @@ function ClickEvent.CreateRoomButton( ... )
 	--CS.UnityEngine.Application.LoadLevel("PlaySence")
 end
 
-function ClickEvent.Store( ... )
-	-- body
-end
-
-function ClickEvent.Option( ... )
-	-- body
-end
-
-function ClickEvent.Mail( ... )
-	-- body
-end
-
-function ClickEvent.Rank( ... )
-	-- body
-end
-
-function ClickEvent.Activity( ... )
-	-- body
-end
-
-function ClickEvent.Method( ... )
-	-- body
-end
-
-function ClickEvent.Reward( ... )
-	-- body
-end
-
-function ClickEvent.More( ... )
-	-- body
-end
-
 function ClickEvent.Close( ... )
 	-- body
 	CS.UnityEngine.Debug.LogWarning("ClosePanel")
@@ -660,6 +815,20 @@ function ClickEvent.CreateRoomId( gameObject )
 	-- body
 	Player._roomId = tonumber(gameObject:GetComponent("InputField").text)
 	CS.UnityEngine.Debug.LogWarning(gameObject.name)
+end
+
+function ClickEvent.ClassicMode( ... )
+	-- body
+	for i=1,7 do
+		_popPanel.panel:GetChild("ChooseFan0"..tostring(i)).selected = false
+	end
+end
+
+function ClickEvent.HighRiskMode( ... )
+	-- body
+	for i=1,7 do
+		_popPanel.panel:GetChild("ChooseFan0"..tostring(i)).selected = true
+	end
 end
 
 function ClickEvent.CreateButton( )
@@ -714,6 +883,10 @@ function ClickEvent.CreateButton( )
 	end
 	if _popPanel.panel:GetChild("ChooseFan06").selected then
 		extend_type[extend_type_count] = "ROOM_EXTEND_TYPE_QIYISE"
+		extend_type_count = extend_type_count + 1
+	end
+	if _popPanel.panel:GetChild("ChooseFan07").selected then
+		extend_type[extend_type_count] = "ROOM_EXTEND_TYPE_BAOSANJIA"
 		extend_type_count = extend_type_count + 1
 	end
 	Player.CmdCreateRoom(model,extend_type,top_mutiple,open_rands)
@@ -807,7 +980,8 @@ end
 
 function ClickEvent.GameTingButton(gameObject)
 	-- body
-	ClickEvent.CloseOperationPanel()
+	--ClickEvent.CloseOperationPanel()
+	ClickEvent._play_ui.operationBar:RemoveChildrenToPool()
 	Player.MahJong.TingPaiUpdateState()
 	Player.MahJong.SetCurrentState(operationState.DAPAI)
 	--Player.CmdPaiOperation("PAI_OPER_TYPE_TINGPAI",{},{})
@@ -816,7 +990,7 @@ end
 function ClickEvent.GamePlayButton( gameObject )
 	-- body
 	gameObject.visible = false
-	Player.MahJong.PlayDoubleDices()
+	--Player.MahJong.PlayDoubleDices()
 	Player.CmdGameOperation()
 end
 
@@ -859,8 +1033,10 @@ end
 
 function ClickEvent.GameCancelButton(gameObject)
 	-- body
+	Player._ting_pai_cache = nil
 	ClickEvent.CloseOperationPanel()
 	Player.MahJong.SetCurrentState(operationState.DAPAI)
+	Player.MahJong.TingPaiCancelState()
 end
 
 function ClickEvent.CloseOperationPanel()
@@ -899,6 +1075,24 @@ function ClickEvent.registerButtonClick(gameObject)
 		CS.UnityEngine.Debug.LogWarning("key no found")
 	end
 
+end
+
+function ClickEvent.registerButtonDown(gameObject)
+	-- body
+	_popPanel.background:GetChild("Di").visible  = false
+	--print(_popPanel.panel.name)
+	if _popPanel.panel.name == ClickEvent.panelTable._calculate_ui then
+		_popPanel.panel.visible = false
+	end
+	
+end
+
+function ClickEvent.registerButtonUp(gameObject)
+	-- body
+	_popPanel.background:GetChild("Di").visible  = true
+	if _popPanel.panel.name == ClickEvent.panelTable._calculate_ui then
+		_popPanel.panel.visible = true
+	end
 end
 
 return ClickEvent

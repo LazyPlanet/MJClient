@@ -50,6 +50,20 @@ int32_t LuaReader::GetMessageTypeFrom(const int64_t global_id, lua_State* L)
 	return message_type;
 }
 
+std::string LuaReader::GetTypeName(int64_t global_id, lua_State* L)
+{
+	std::string message_type = AssetInstance.GetTypeName(global_id);
+	lua_pushlstring(L, message_type.c_str(), message_type.size());
+	return message_type;
+}
+
+std::string LuaReader::GetBinContent(int64_t global_id, lua_State* L)
+{
+	std::string message_content = AssetInstance.GetBinContent(global_id);
+	lua_pushlstring(L, message_content.c_str(), message_content.size());
+	return message_content;
+}
+
 static void PushValue(const pb::Message* pMsg, const pb::FieldDescriptor* fd, lua_State* L);
 static void SetField(const int key, const pb::Message* pMsg, const pb::FieldDescriptor* fd, lua_State* L);
 static void SetField(const std::string& key, const pb::Message* pMsg, const pb::FieldDescriptor* fd, lua_State* L);

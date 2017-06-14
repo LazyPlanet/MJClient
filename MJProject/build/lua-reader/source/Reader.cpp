@@ -219,6 +219,8 @@ bool AssetManager::LoadAssets(fs::path& full_path)
 				std::string type_name = type_field->default_value_enum()->name();
 				log_info("%s: line:%d type_name:%s loaded success.", __func__, __LINE__, type_name.c_str());
 				_assets_bytypes[type_name].insert(message);
+				_assets_name[global_id] = type_name;
+				_bin_assets[global_id] = message->SerializeAsString();
 			}
 		}
 	}
@@ -245,4 +247,13 @@ pb::Message* AssetManager::Get(int64_t global_id)
 	return it->second;
 }
 
+std::string AssetManager::GetTypeName(int64_t global_id)
+{
+	return _assets_name[global_id];
 }
+
+std::string AssetManager::GetBinContent(int64_t global_id)
+{
+	return _bin_assets[global_id];
+}
+

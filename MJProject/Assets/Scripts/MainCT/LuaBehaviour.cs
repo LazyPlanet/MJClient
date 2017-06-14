@@ -13,6 +13,7 @@ using XLua;
 using XLua.LuaDLL;
 using System;
 using UnityEngine.UI;
+using System.IO;
 
 [System.Serializable]
 //public class Injection
@@ -43,6 +44,7 @@ public class LuaBehaviour : MonoBehaviour {
         LuaEnvSingleton.Instance.AddBuildin("rapidjson", XLua.LuaDLL.Lua.LoadRapidJson);
         LuaEnvSingleton.Instance.AddBuildin("protobuf_c", XLua.LuaDLL.Lua.LoadlProtobufC);
         LuaEnvSingleton.Instance.AddBuildin("LuaReader", XLua.LuaDLL.Lua.LoadlLuaReader);
+        LuaEnvSingleton.Instance.AddBuildin("gbk", XLua.LuaDLL.Lua.LoadlGbk);
         XLua.LuaDLL.Lua.InitXLuaAnyLog();
         //Toggle mytoggle;
         scriptEnv = LuaEnvSingleton.Instance.NewTable();
@@ -106,6 +108,20 @@ public class LuaBehaviour : MonoBehaviour {
     void LateUpdate()
     {
 
+    }
+
+    public void YieldAndCallback(object to_yield, Action callback)
+    {
+        StartCoroutine(CoBody(to_yield, callback));
+    }
+
+    private IEnumerator CoBody(object to_yield, Action callback)
+    {
+        if (to_yield is IEnumerator)
+            yield return StartCoroutine((IEnumerator)to_yield);
+        else
+            yield return to_yield;
+        callback();
     }
     //private static void empty() { }
     //protected static Action mainThreadDelegate = empty;

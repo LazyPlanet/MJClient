@@ -1,3 +1,5 @@
+syntax = "proto2";
+
 package Adoter.Asset;
 /////////////////////////////////////////////////////
 // 
@@ -107,16 +109,44 @@ enum ROOM_TYPE {
 	ROOM_TYPE_GAOSHOU = 3; //高手房
 	ROOM_TYPE_DASHI = 4; //大师房
 }
-//房间
+
+//额外番型
+enum ROOM_EXTEND_TYPE {
+	ROOM_EXTEND_TYPE_NULL = 0; //初始值
+	ROOM_EXTEND_TYPE_ZHANLIHU = 1; //站立胡
+	ROOM_EXTEND_TYPE_JIAHU = 2; //夹胡
+	ROOM_EXTEND_TYPE_XUANFENGGANG = 3; //旋风杠
+	ROOM_EXTEND_TYPE_BAOPAI = 4; //宝牌
+	ROOM_EXTEND_TYPE_DUANMEN = 5; //可断门
+	ROOM_EXTEND_TYPE_QIYISE = 6; //清一色
+	ROOM_EXTEND_TYPE_BAOSANJIA = 7; //点炮包三家
+}
+
+//模式选择-服务器尚无用途
+enum ROOM_MODEL_TYPE {
+	ROOM_MODEL_TYPE_CLASSICAL = 1; //经典模式
+	ROOM_MODEL_TYPE_MULTIPLE = 2; //高番模式
+}
+
+//房间设置-番型选择
+message RoomOptions {
+	optional ROOM_MODEL_TYPE model = 1; //模式选择
+	optional int32 extend_type_count = 2 [ default = 10 ]; //番型数量
+	repeated ROOM_EXTEND_TYPE extend_type = 3; //额外番型
+	optional int32 top_mutiple = 4; //封顶番数
+	optional int32 open_rands = 5 [ default = 4 ]; //局数
+}
+
+//房间设置
 message RoomLimit {
 	optional ASSET_TYPE type_t = 1 [ default = ASSET_TYPE_ROOM ];
 	optional AssetCommonProp common_prop = 2;
 	optional ROOM_TYPE room_type = 3; //房间类型
-	optional int32 min_limit = 4; //欢乐豆下限
-	optional int32 max_limit = 5; //欢乐豆上限
-	optional int32 max_fan = 6; //最大番数
-	optional int32 cost_count = 7; //每局消耗欢乐豆数量
-	optional int32 base_count = 8; //每番消耗欢乐豆数量
+	optional int32 min_limit = 4; //欢乐豆下限(非好友房使用)
+	optional int32 max_limit = 5; //欢乐豆上限(非好友房使用)
+	optional int32 cost_count = 6; //每局消耗欢乐豆数量(非好友房使用)
+	optional int32 base_count = 7; //每番消耗欢乐豆数量(非好友房使用)
+	optional RoomOptions room_options = 8; //额外番型
 }
 
 //通用限制
@@ -193,6 +223,8 @@ message CommonConst {
 	optional int32 time_out = 8 [ default = 8 ]; //玩家操作等待时间(单位：秒)
 	optional int64 daily_sign_id = 9; //每日签到奖励ID[DailySign]数据
 	optional int64 fan_id = 10; //番数定义ID[RoomFan]数据
+	optional int64 room_card_id = 11; //房卡ID[Item_RoomCard]数据
+	optional int32 liuju_count = 12; //流局牌数
 }
 
 //通用奖励
@@ -275,6 +307,7 @@ message Mall {
 
 //番数类型
 enum FAN_TYPE {
+	FAN_TYPE_PINGHU = 0; //平胡
 	FAN_TYPE_ZHUANG = 1; //庄家
 	FAN_TYPE_DIAN_PAO = 2; //点炮
 	FAN_TYPE_ZI_MO = 3; //自摸
@@ -298,6 +331,8 @@ enum FAN_TYPE {
 	FAN_TYPE_JIA_HU_NORMAL = 21; //普通夹胡
 	FAN_TYPE_JIA_HU_MIDDLE = 22; //中等夹胡(3/7)
 	FAN_TYPE_JIA_HU_HIGHER = 23; //高番夹胡(5)
+	FAN_TYPE_PIAO_WEIHU = 24; //明飘未胡
+	FAN_TYPE_BAOSANJIA = 25; //包三家
 }
 //番数
 message RoomFan {
@@ -309,7 +344,7 @@ message RoomFan {
 		optional bytes name = 4; //名称
 		optional int32 multiple = 5; //番数
 	}
-	optional int32 fans_count = 3 [ default = 25 ]; //番数量
+	optional int32 fans_count = 3 [ default = 30 ]; //番数量
 	repeated FanElement fans = 4; //番数据
 
 }
@@ -441,7 +476,7 @@ message Item_CommonProp {
 //物品基类(所有物品都包在此)
 message Item_Item {	
 	optional ASSET_TYPE type_t = 1 [ default = ITEM_TYPE_BEGIN ];
-	optional bytes stuff = 2; //包含的子类数据，非物品通用数据(例如，Item_Potion序列化后的数据)
+	optional bytes stuff = 2; //包含的子类数据，非物品通用数据(例如，Asset::Item_Potion序列化后的数据)
 	optional bytes stuff_extra = 3; //物品额外存盘数据
 }
 
@@ -470,7 +505,6 @@ message Item_RoomCard {
 	optional Item_CommonProp item_common_prop = 2; //物品公共属性
 	optional int32 rounds = 3 [ default = 1 ]; //该张房卡可以玩多少局麻将
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

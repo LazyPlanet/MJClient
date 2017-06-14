@@ -1,10 +1,11 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\MainCT\LuaBehaviour.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Resources\FairyUI\MXText.xml">
     <Files>
-      <File FileName="Assets\Scripts\MainCT\EventTriggerListener.cs" Line="31" Column="25" />
+      <File FileName="Assets\Scripts\MainCT\EventTriggerListener.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\Network\SocketClient.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\MainCT\LuaBehaviour.cs" Line="1" Column="1" />
+      <File FileName="Assets\Resources\FairyUI\MXText.xml" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
