@@ -45,7 +45,7 @@ bool AssetManager::Load(const std::string assetFilePath)
 		if (!descriptor)
 		{
 			std::cout << __func__ << ": descriptor is null." << std::endl;
-			log_info("%s: descriptor is null.", __func__);
+			log_info("%s: descriptor %d is null.", __func__, i);
 			return false;
 		}
 
@@ -142,14 +142,17 @@ bool AssetManager::LoadAssets(fs::path& full_path)
 					log_info("%s : directory_string %s is null.", __func__, directory_string.c_str());
 					return false;
 				}
-
+#if defined(WIN32)
 				int32_t found_pos = directory_string.find_last_of("\\");
+#else
+				int32_t found_pos = directory_string.find_last_of("//");
+#endif
 				const std::string& message_name = directory_string.substr(found_pos + 1);	//MESSAGE名称即为文件夹名称
 				const pb::Descriptor* descriptor = this->_file_descriptor->FindMessageTypeByName(message_name);
 				if (!descriptor) 
 				{
 					std::cout << __func__ << ": descriptor is null." << std::endl;
-					log_info("%s : descriptor is null.", __func__);
+					log_info("%s : descriptor is null, for directory_string:%s message_name:%s found_pos:%d", __func__, directory_string.c_str(), message_name.c_str(), found_pos);
 					return false;
 				}
 

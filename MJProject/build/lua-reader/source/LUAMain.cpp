@@ -23,6 +23,7 @@ static void setfuncs(lua_State* L, const luaL_Reg *funcs)
 
 static int Load(lua_State* L) {
 	const std::string assetFilePath = luaL_checkstring(L, 1);
+	log_info("%s: line:%d GenerateDescriptorPool filename:%s.", __func__, __LINE__, assetFilePath.c_str());
 	if (!Parser::Instance().GenerateDescriptorPool(assetFilePath))
 	{
 		lua_pushboolean(L, false);

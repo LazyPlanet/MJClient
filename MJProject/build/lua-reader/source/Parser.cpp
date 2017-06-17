@@ -8,7 +8,13 @@
 
 bool Parser::GenerateDescriptorPool(const std::string filePath)
 {
-	if (_loader) return true;
+	log_info("%s: descriptor_file is %s.", __func__, filePath.c_str());
+
+	if (_loader) 
+	{
+		log_info("%s: descriptor_file is %s who has been loaded success.", __func__, filePath.c_str());
+		return true;
+	}
 
 	const int descriptor_cout = 1;
 	const string tempPath = filePath + "P_Asset.proto";
