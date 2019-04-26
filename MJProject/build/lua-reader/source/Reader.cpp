@@ -1,10 +1,14 @@
 #include "stdafx.h"
 #include "Reader.h"
 #include "Parser.h"
-#include <fstream>
 #include "AnyLog.h"
 
+#include <fstream>
+#include <thread>
+
 namespace Asset {
+
+#define MAX_FILE_SIZE 100000
 
 AssetManager::AssetManager() : _parse_sucess(false)
 {
@@ -13,12 +17,22 @@ AssetManager::AssetManager() : _parse_sucess(false)
 
 bool AssetManager::Load(const std::string assetFilePath)
 {
-	std::cout << __func__ << ": start load..." << std::endl;
-	log_info("%s: Start load...", __func__);
+	this->_asset_path = assetFilePath;
+
+	std::thread t(&AssetManager::OnLoad, this);
+	t.join();
+
+	return true;
+}
+
+bool AssetManager::OnLoad()
+{
+	//std::cout << __func__ << ": start load..." << std::endl;
+	//log_info("%s: Start load...", __func__);
 
 	if (_parse_sucess) return true;
 
-	this->_asset_path = assetFilePath;
+	//this->_asset_path = assetFilePath;
 
 	this->_file_descriptor = Parser::Instance().GetFileDescriptor();
 	if (!this->_file_descriptor)
@@ -44,7 +58,6 @@ bool AssetManager::Load(const std::string assetFilePath)
 		const pb::Descriptor* descriptor = this->_file_descriptor->message_type(i);
 		if (!descriptor)
 		{
-			std::cout << __func__ << ": descriptor is null." << std::endl;
 			log_info("%s: descriptor %d is null.", __func__, i);
 			return false;
 		}
@@ -55,7 +68,6 @@ bool AssetManager::Load(const std::string assetFilePath)
 		const pb::Message* msg = Parser::Instance().GetDynamicMessageFactory().GetPrototype(descriptor);
 		if (!msg)
 		{
-			std::cout << __func__ << ": msg is null." << std::endl;
 			log_info("%s: msg is null.", __func__);
 			continue;
 		}
@@ -67,24 +79,21 @@ bool AssetManager::Load(const std::string assetFilePath)
 		}
 		else
 		{
-			std::cout << "Load asset error, reduplicate message name：" << msg->GetTypeName() << std::endl;
-			log_info("Load asset error, reduplicate message name：%s", msg->GetTypeName().c_str());
+			std::cout << "Load asset error, reduplicate message name:" << msg->GetTypeName() << std::endl;
+			log_info("Load asset error, reduplicate message name:%s", msg->GetTypeName().c_str());
 		}
 	}
 	//加载所有资源数据
 	fs::path full_path(_asset_path);
 	if (!LoadAssets(full_path)) 
 	{
-		std::cout << "LoadAssets error..." << std::endl;
 		log_info("LoadAssets error...");
 		return false;
 	}
-	log_info("%s:Load log start...", __func__);
-	std::cout << __func__ << ":Load asset data success，messages total:" << _messages.size() << ", asset total:" << _assets.size() << ", types total:" << _assets_bytypes.size() << std::endl;
 	int message_size =_messages.size(), asset_size = _assets.size(), asset_bytypes_size = _assets_bytypes.size();
-	log_info("%s:Load asset data success，messages total:%d", __func__, message_size);
-	log_info("%s:Load asset data success，asset total:%d", __func__, asset_size);
-	log_info("%s:Load asset data success，asset_bytypes total:%d", __func__, asset_bytypes_size);
+	log_info("%s:Load asset data success, messages total:%d", __func__, message_size);
+	log_info("%s:Load asset data success, asset total:%d", __func__, asset_size);
+	log_info("%s:Load asset data success, asset_bytypes total:%d", __func__, asset_bytypes_size);
 	log_info("%s:Load finished...", __func__);
 	this->_parse_sucess = true;
 	return true;
@@ -115,43 +124,46 @@ bool AssetManager::LoadAssets(fs::path& full_path)
 				std::fstream file(filename.c_str(), std::ios::in | std::ios::binary);
 				if (!file) 
 				{
-					std::cout << __func__ << " open file error, filename:" << filename << std::endl;
 					log_info("%s open file error, filename:%s", __func__, filename.c_str());
 					return false; 	//如果一个有问题就退出
 				}
+				
+				//file.seekg(0, file.end);
+				//auto file_size = file.tellg();
+				//file.seekg(0, file.beg);
 
 				int32_t size = 0;
 
 				file >> size;
-				if (size == 0 || size > 1024) 
+				if (size == 0 || size > MAX_FILE_SIZE) 
 				{
-					std::cout << __func__ << " open file error, size:" << size << std::endl;
 					log_info("%s open file error, size:%d", __func__, size);
-					return false;	//理论上单个文件不会超过1024字节
+					return false;	//理论上单个文件不会超过MAX_FILE_SIZE字节
 				}
 
-				char content[1024];
-				file.readsome(content, size);
-				//////关闭文件
-				file.close();
-
-				std::string directory_string = item_begin->path().parent_path().string();
+				char content[MAX_FILE_SIZE];
+				file.read(content, size);
+				file.close(); //关闭文件
+				const std::string directory_string = item_begin->path().parent_path().string();
 				if (directory_string == "") 
 				{
-					std::cout << __func__ << ": directory_string is null." << std::endl;
 					log_info("%s : directory_string %s is null.", __func__, directory_string.c_str());
 					return false;
 				}
 #if defined(WIN32)
 				int32_t found_pos = directory_string.find_last_of("\\");
 #else
-				int32_t found_pos = directory_string.find_last_of("//");
+				int32_t found_pos = directory_string.find_last_of("/");
 #endif
+				if (found_pos < 0)
+				{
+					log_info("%s : descriptor is invalid, for directory_string:%s found_pos:%d", __func__, directory_string.c_str(), found_pos);
+					return false;
+				}
 				const std::string& message_name = directory_string.substr(found_pos + 1);	//MESSAGE名称即为文件夹名称
 				const pb::Descriptor* descriptor = this->_file_descriptor->FindMessageTypeByName(message_name);
 				if (!descriptor) 
 				{
-					std::cout << __func__ << ": descriptor is null." << std::endl;
 					log_info("%s : descriptor is null, for directory_string:%s message_name:%s found_pos:%d", __func__, directory_string.c_str(), message_name.c_str(), found_pos);
 					return false;
 				}
@@ -159,7 +171,6 @@ bool AssetManager::LoadAssets(fs::path& full_path)
 				const pb::Message* msg = Parser::Instance().GetDynamicMessageFactory().GetPrototype(descriptor);
 				if (!msg)
 				{
-					std::cout << __func__ << ": msg is null." << std::endl;
 					log_info("%s : msg is null.", __func__);
 					return false;
 				}
@@ -168,7 +179,8 @@ bool AssetManager::LoadAssets(fs::path& full_path)
 				bool result = message->ParseFromArray(content, size);
 				if (!result)
 				{
-					log_info("%s : parse from array error.", __func__);
+					const auto message_str = message->ShortDebugString();
+					log_info("%s : parse pb from array error, file size:%d MAX_FILE_SIZE:%d data:%s", message_name.c_str(), size, MAX_FILE_SIZE, message_str.c_str());
 					std::cout << __func__ << ": parse from array error." << std::endl;
 					return false;
 				}
@@ -220,7 +232,7 @@ bool AssetManager::LoadAssets(fs::path& full_path)
 				////////////////////////////////////////////加载到类型表
 				int32_t type_t = type_field->default_value_enum()->number();
 				std::string type_name = type_field->default_value_enum()->name();
-				log_info("%s: line:%d type_name:%s loaded success.", __func__, __LINE__, type_name.c_str());
+				//log_info("%s: line:%d type_name:%s loaded success.", __func__, __LINE__, type_name.c_str());
 				_assets_bytypes[type_name].insert(message);
 				_assets_name[global_id] = type_name;
 				_bin_assets[global_id] = message->SerializeAsString();
@@ -238,7 +250,7 @@ pb::Message* AssetManager::GetMessage(int32_t message_type)
 	return it->second;
 }
 
-std::unordered_set<pb::Message*>& AssetManager::GetMessagesByType(std::string message_type)
+std::set<pb::Message*>& AssetManager::GetMessagesByType(std::string message_type)
 {
 	return _assets_bytypes[message_type];
 }

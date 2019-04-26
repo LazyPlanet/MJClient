@@ -24,12 +24,14 @@ static void setfuncs(lua_State* L, const luaL_Reg *funcs)
 static int Load(lua_State* L) {
 	const std::string assetFilePath = luaL_checkstring(L, 1);
 	log_info("%s: line:%d GenerateDescriptorPool filename:%s.", __func__, __LINE__, assetFilePath.c_str());
+
 	if (!Parser::Instance().GenerateDescriptorPool(assetFilePath))
 	{
 		lua_pushboolean(L, false);
 		log_info("%s: line:%d GenerateDescriptorPool initial error.", __func__, __LINE__);
 		return 1;
 	}
+	
 	if (!Asset::AssetManager::Instance().Load(assetFilePath))
 	{
 		lua_pushboolean(L, false);
@@ -57,7 +59,7 @@ static int GetMessage(lua_State* L) {
 static int GetMessagesByType(lua_State* L) {
 	log_info("%s: line:%d.", __func__, __LINE__);
 	const std::string message_type = luaL_checkstring(L, 1);
-	log_info("%s: line:%d message_type£º%s.", __func__, __LINE__, message_type.c_str());
+	log_info("%s: line:%d message_type:%s.", __func__, __LINE__, message_type.c_str());
 	log_info("%s: line:%d.", __func__, __LINE__);
 	Asset::LuaReader::Instance().GetMessagesByType(message_type, L);
 	log_info("%s: line:%d.", __func__, __LINE__);
